@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bbl-shutter-cam"
+version = "0.1.0"
+description = "Use a Bambu Cyberbrick BBL_SHUTTER BLE trigger to capture photos on Raspberry Pi (rpicam-still)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Casa Taylor" }]
+keywords = ["raspberry-pi", "bluetooth", "ble", "timelapse", "bambu", "rpicam"]
+dependencies = [
+  "bleak>=0.22.0",
+  "tomlkit>=0.12.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/<yourname>/bbl-shutter-cam"
+Repository = "https://github.com/<yourname>/bbl-shutter-cam"
+
+[project.scripts]
+bbl-shutter-cam = "bbl_shutter_cam.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

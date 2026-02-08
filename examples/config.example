@@ -1,0 +1,120 @@
+# Example configuration for bbl-shutter-cam
+
+# Copy this file to:
+
+# ~/.config/bbl-shutter-cam/config.toml
+
+# and adjust per printer / camera setup.
+
+# Which profile is used when --profile is not specified
+
+default_profile = "p1s-office"
+
+[profiles]
+
+[profiles.p1s-office]
+
+```
+# ----------------------------
+# Bluetooth device information
+# ----------------------------
+# The name is used during `setup` to find the device.
+# The MAC address and notify_uuid are learned automatically
+# and written here by `bbl-shutter-cam setup`.
+[profiles.p1s-office.device]
+name = "BBL_SHUTTER"
+# mac = "B8:F8:62:A9:92:7E"
+# notify_uuid = "00002a4d-0000-1000-8000-00805f9b34fb"
+
+# ----------------------------
+# Camera / capture behavior
+# ----------------------------
+[profiles.p1s-office.camera]
+output_dir = "/home/pi/captures/p1s-office"
+filename_format = "%Y%m%d_%H%M%S.jpg"
+
+# Minimum seconds between captures
+# (prevents accidental double-triggers)
+min_interval_sec = 0.5
+
+# ----------------------------
+# rpicam-still options
+# ----------------------------
+[profiles.p1s-office.camera.rpicam]
+
+# Resolution
+width = 1920
+height = 1080
+
+# Disable preview (recommended for headless systems)
+nopreview = true
+
+# Orientation
+# rotation = 180      # 0, 90, 180, 270
+# hflip = true
+# vflip = false
+
+# ----------------------------
+# Auto exposure / color tuning
+# ----------------------------
+
+# Auto white balance mode
+# awb = "auto"        # auto, daylight, tungsten, fluorescent, indoor
+
+# Exposure compensation
+# ev = 0              # integer; negative = darker, positive = brighter
+
+# Noise reduction
+# denoise = "cdn_off"  # cdn_off, cdn_fast, cdn_hq
+
+# Sharpening
+# sharpness = 1.0
+
+# ----------------------------
+# Manual exposure "lock" (optional)
+# ----------------------------
+# Setting any of these disables full auto behavior and
+# helps eliminate flicker in enclosure lighting.
+
+# shutter = 20000      # microseconds (e.g. 20000 = 1/50s)
+# gain = 2.0
+# awbgains = "1.5,1.8"
+```
+
+# --------------------------------------------------
+
+# Additional profiles can be added below
+
+# --------------------------------------------------
+
+# [profiles.x1c-garage]
+
+# [profiles.x1c-garage.device]
+
+# name = "BBL_SHUTTER"
+
+#
+
+# [profiles.x1c-garage.camera]
+
+# output_dir = "/home/pi/captures/x1c-garage"
+
+# filename_format = "%Y%m%d_%H%M%S.jpg"
+
+# min_interval_sec = 1.0
+
+#
+
+# [profiles.x1c-garage.camera.rpicam]
+
+# width = 1920
+
+# height = 1080
+
+# rotation = 90
+
+# awb = "daylight"
+
+# shutter = 25000
+
+# gain = 1.5
