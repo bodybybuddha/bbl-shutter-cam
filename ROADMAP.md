@@ -55,6 +55,57 @@ This document tracks development releases and features for the bbl-shutter-cam p
 
 ---
 
+## Stage 2.5: Dynamic Signal Discovery & Event Configuration 📋 Planned
+
+### Objectives
+- Integrate Bluetooth signal discovery into the main application
+- Support unknown/vendor-specific BLE trigger signals automatically
+- Store discovered signals in profile configuration
+- Enable flexible event-to-action mapping
+
+### Planned Tasks
+- [ ] Create integrated debug mode (`bbl-shutter-cam debug` or extend `scan`)
+  - Option A: Standalone `debug` subcommand
+  - Option B: Extend `scan` with `--debug-signals` flag
+- [ ] Capture and persist discovered signals:
+  - Discover new signal patterns during debug/scan mode
+  - Store signal-to-event mapping in config file per profile
+  - Update config with previously unseen signals
+- [ ] Implement event-based trigger system:
+  - Replace hardcoded `PRESS_BYTES` with configurable events
+  - Load trigger signals from profile config
+  - Support multiple trigger signals per profile
+  - Exclude release events by default from photo capture
+- [ ] Enhanced event handling:
+  - Add `trigger_on_release` option (default: false)
+  - Add `capture_on_all_events` option (default: false)
+  - Document which events map to which actions
+- [ ] Update config schema:
+  - Add `[profiles.<name>.device.events]` section
+  - Store discovered signals with metadata (first seen, count, etc.)
+  - Add event filtering/action configuration options
+- [ ] Improve logging:
+  - Show which event triggered a capture
+  - Log discovered signals during debug mode
+  - Provide summary statistics at exit
+
+### Configuration Example
+```toml
+[profiles.ps1-office.device.events]
+# Auto-discovered signals
+signals = [
+  { hex = "4000", name = "manual_button", capture = true },
+  { hex = "8000", name = "bambu_studio", capture = true },
+  { hex = "0000", name = "release", capture = false }
+]
+```
+
+### Dependencies
+- Requires debug_ble_traffic.py from v0.1.0 ✅
+- Leverages config.py infrastructure (Stage 1 ✅)
+
+---
+
 # Future Versions
 
 ## Stage 3: Testing & CI/CD 📋 Planned
@@ -171,7 +222,8 @@ This document tracks development releases and features for the bbl-shutter-cam p
 
 | Stage | Complexity | Est. Time | Target |
 |-------|-----------|-----------|--------|
-| 3 (Testing & CI/CD) | Medium | 3-4 days | v0.2.0 or later |
+| 2.5 (Signal Discovery) | Medium | 3-4 days | v0.2.0 |
+| 3 (Testing & CI/CD) | Medium | 3-4 days | v0.2.0 |
 | 4 (Systemd) | Low-Medium | 1-2 days | v0.2.0 or later |
 | 5 (Documentation) | Low | 2-3 days | v0.2.0 or later |
 | 6 (Extended Features) | High | 1-2 weeks | v1.0.0+ |
