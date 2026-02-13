@@ -12,7 +12,8 @@ from .camera import build_rpicam_still_cmd, camera_config_from_profile, make_out
 from .config import update_profile_device_fields
 from .util import LOG
 
-PRESS_BYTES = b"\x40\x00"
+PRESS_BYTES = b"\x40\x00"              # Manual button press
+BAMBU_STUDIO_TRIGGER = b"\x80\x00"      # Bambu Studio app trigger
 RELEASE_BYTES = b"\x00\x00"
 
 
@@ -160,14 +161,15 @@ async def run_profile(
                 if verbose:
                     print(f"[notify] {b.hex()}")
 
-                if b == PRESS_BYTES:
+                if b == PRESS_BYTES or b == BAMBU_STUDIO_TRIGGER:
                     now = asyncio.get_event_loop().time()
                     if now - last_press < min_interval:
                         LOG.debug("Debounced press (too soon).")
                         return
                     last_press = now
 
-                    LOG.info("SHUTTER PRESS (4000)")
+                    trigger_type = "manual button" if b == PRESS_BYTES else "Bambu Studio app"
+                    LOG.info(f"SHUTTER PRESS ({trigger_type}) {b.hex()}")
                     if dry_run:
                         return
 
