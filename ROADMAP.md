@@ -106,6 +106,133 @@ signals = [
 
 ---
 
+## Stage 2.6: Interactive Camera Calibration Mode 📋 Planned
+
+### Objectives
+- Provide interactive, headless-friendly camera tuning workflow
+- Allow users to dial in optimal settings per profile
+- Support Raspberry Pi Camera Module 3 NOIR specifics
+- Enable iterative photo capture and configuration updates
+
+### Planned Tasks
+- [ ] Create `bbl-shutter-cam tune --profile <name>` command
+- [ ] Build interactive tuning menu (headless-friendly)
+  - Multi-option menu with single-key navigation
+  - Show current settings and changes
+  - No dependencies on graphical display
+- [ ] Implement tuning categories:
+  - **Orientation**: Rotation (0/90/180/270), Flip H, Flip V
+  - **Focus**: Autofocus mode (auto/manual), Lens position (0.0-1.0)
+  - **Exposure & Color**: EV, AWB modes, Saturation, Sharpness
+  - **Noise & Speed**: ZSL (enable/disable), Denoise mode
+  - **Advanced**: ISO/Gain, Shutter speed, Metering mode
+  - **NOIR-Specific**: Low-light boost, IR sensitivity options
+- [ ] Capture workflow:
+  - Take single test photo with current settings
+  - Display file path for manual inspection (headless inspection via SFTP/SCP)
+  - Return to menu for adjustments
+  - Support batch naming with settings identifier (e.g., `tune_ev0_awb-daylight.jpg`)
+- [ ] Configuration integration:
+  - Apply settings to camera config dataclass
+  - Build rpicam-still command with tuned parameters
+  - Save validated settings back to profile config
+  - Support rollback to previous settings
+- [ ] User guidance:
+  - Show recommended settings for NOIR in enclosures
+  - Explain each setting's impact on output
+  - Suggest starting points based on lighting conditions
+  - Document ZSL benefits for timelapse capture
+
+### Configuration Tuning Options
+
+#### Orientation (Essential)
+- `rotation`: 0, 90, 180, 270
+- `hflip`: true/false
+- `vflip`: true/false
+
+#### Focus Control
+- `autofocus`: "auto" or "manual"
+- `lens_position`: 0.0 (infinity) to 1.0 (closest, ~8cm for Module 3)
+- `af_on_capture`: true/false (trigger AF before each shot)
+
+#### Exposure & Color
+- `ev`: -10 to +10 (exposure value)
+- `awb`: "auto", "daylight", "tungsten", "warm", "cool", "shade"
+- `saturation`: 0-2.0 (relative multiplier)
+- `sharpness`: 0-2.0 (relative multiplier)
+
+#### Speed & Noise
+- `zsl`: true/false (zero shutter lag / buffered capture)
+- `denoise`: "off", "fast", "hq"
+
+#### Advanced
+- `iso`: 100-800
+- `gain`: manual sensor gain value
+- `shutter`: microseconds (manual shutter speed)
+- `metering`: "center", "spot", "matrix", "custom"
+
+#### NOIR-Specific
+- `low_light_boost`: true/false
+- `lens_shading`: true/false (correction for edge darkening)
+
+### Configuration Example
+```toml
+[profiles.ps1-office.camera.rpicam]
+width = 1920
+height = 1080
+nopreview = true
+rotation = 0
+hflip = false
+vflip = false
+
+# ZSL for faster, more reliable timelapse
+zsl = true
+denoise = "hq"
+
+# Focus locked for consistent captures
+autofocus = "manual"
+lens_position = 0.5
+
+# Color & Exposure
+ev = 0
+awb = "daylight"
+saturation = 1.0
+sharpness = 0.5
+
+# NOIR Camera optimizations
+low_light_boost = true
+metering = "matrix"
+```
+
+### Interactive Menu Example (Headless)
+```
+=== Camera Calibration: ps1-office ===
+Last photo: /home/pi/captures/ps1-office/tune_001.jpg
+
+CURRENT SETTINGS:
+  Rotation: 0°      HFlip: No      VFlip: No
+  Focus: manual     Pos: 0.5       LowLight: Yes
+  EV: 0             AWB: daylight  Denoise: hq
+  ZSL: enabled      Saturation: 1.0
+
+ADJUST SETTINGS:
+  [R]otation | [H/V]flip | [F]ocus [P]osition | [E]V
+  [A]WB | [Sa]turation | [Sh]arpness | [D]enoise | [Z]SL
+  [L]ow-light | [Me]tering
+
+ACTIONS:
+  [T]ake photo | [C]ompare settings | [Sa]ve & exit | [Q]uit
+
+Choose option: _
+```
+
+### Dependencies
+- Requires camera.py module (Stage 1 ✅)
+- Requires config.py update (Stage 1 ✅)
+- Can run independently or after Stage 2.5
+
+---
+
 # Future Versions
 
 ## Stage 3: Testing & CI/CD 📋 Planned
@@ -223,6 +350,7 @@ signals = [
 | Stage | Complexity | Est. Time | Target |
 |-------|-----------|-----------|--------|
 | 2.5 (Signal Discovery) | Medium | 3-4 days | v0.2.0 |
+| 2.6 (Camera Calibration) | Medium | 3-4 days | v0.2.0 |
 | 3 (Testing & CI/CD) | Medium | 3-4 days | v0.2.0 |
 | 4 (Systemd) | Low-Medium | 1-2 days | v0.2.0 or later |
 | 5 (Documentation) | Low | 2-3 days | v0.2.0 or later |
