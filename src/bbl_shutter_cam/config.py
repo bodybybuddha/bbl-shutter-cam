@@ -170,7 +170,7 @@ def load_profile(path: Path, profile_name: str | None) -> Dict[str, Any]:
     # Attach resolved name for convenience
     prof["_profile_name"] = profile_name
 
-    return prof  # type: ignore[return-value]
+    return prof  # type: ignore[no-any-return]
 
 
 def get_trigger_events(profile: Dict[str, Any]) -> list[Dict[str, Any]]:
@@ -224,7 +224,7 @@ def get_trigger_events(profile: Dict[str, Any]) -> list[Dict[str, Any]]:
             },
         ]
 
-    return events  # type: ignore[return-value]
+    return events  # type: ignore[no-any-return]
 
 
 def get_event_trigger_bytes(profile: Dict[str, Any]) -> list[bytes]:

@@ -373,7 +373,7 @@ async def debug_signals(
             return
 
         # Track signals by UUID
-        seen_data: dict[str, set[bytes]] = {}
+        seen_data: dict[str, list[bytes]] = {}
 
         def make_callback(uuid: str):
             def callback(_sender: int, data: bytearray) -> None:
