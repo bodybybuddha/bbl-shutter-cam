@@ -146,9 +146,3 @@ See [ROADMAP.md](../ROADMAP.md) for detailed development timeline.
 ## License
 
 MIT License — See [LICENSE](../LICENSE) file for details.
-
----
-
-## Acknowledgments
-
-Built for the Bambu Lab community, with special thanks to those reverse-engineering the CyberBrick BLE protocol and sharing their discoveries.
