@@ -11,7 +11,11 @@ Run `bbl-shutter-cam` automatically on Pi boot.
 
 ## Overview
 
-Systemd services ensure `bbl-shutter-cam` starts and restarts automatically.
+> **Note:** Systemd auto-start is **optional** and not required for basic operation. 
+> 
+> While `bbl-shutter-cam` is not designed as a persistent daemon or background service, systemd can be useful for users who want the tool to automatically start listening for Bluetooth triggers when the Pi boots. The application runs continuously to monitor BLE signals, making systemd a convenient way to ensure it's always ready without manual intervention.
+
+Systemd services ensure `bbl-shutter-cam` starts and restarts automatically on boot.
 
 ## User Service (Recommended for Development)
 

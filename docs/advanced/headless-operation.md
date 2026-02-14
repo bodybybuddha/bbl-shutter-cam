@@ -70,9 +70,13 @@ Simple background execution:
 nohup ~/bbl-shutter-cam/venv/bin/bbl-shutter-cam run --profile my-printer > ~/bbl.log 2>&1 &
 ```
 
-### Method 3: systemd (Recommended)
+### Method 3: systemd (Optional)
+
+For automatic start on boot:
 
 → See [Auto-Start with Systemd](systemd-service.md)
+
+**Note:** Systemd is not required but useful for ensuring the tool starts automatically and stays running.
 
 ---
 

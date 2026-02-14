@@ -15,14 +15,14 @@ import asyncio
 import sys
 from pathlib import Path
 
-from . import discover
+from . import discover, tune
 from .config import DEFAULT_CONFIG_PATH, ensure_config_exists, load_profile
 from .util import LOG, configure_logging
 
 
 def _build_parser() -> argparse.ArgumentParser:
     """Build and return the argument parser for all CLI commands.
-    
+
     Returns:
         argparse.ArgumentParser: Configured parser with all subcommands.
     """
@@ -80,6 +80,11 @@ def _build_parser() -> argparse.ArgumentParser:
     debug.add_argument("--update-config", action="store_true", help="Automatically update config with discovered signals")
     debug.set_defaults(func=_cmd_debug)
 
+    # tune
+    tune_cmd = sub.add_parser("tune", help="Interactive camera calibration and tuning")
+    tune_cmd.add_argument("--profile", required=True, help="Profile name to tune (e.g. p1s-office)")
+    tune_cmd.set_defaults(func=_cmd_tune)
+
     # run
     run = sub.add_parser("run", help="Run listener for a profile")
     run.add_argument("--profile", default=None, help="Profile name (default: config default_profile)")
@@ -93,15 +98,15 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _cmd_scan(args: argparse.Namespace) -> int:
     """Scan for nearby BLE devices.
-    
+
     Performs a BLE scan and prints discovered devices. Optionally filters
     results by device name.
-    
+
     Args:
         args: Parsed command-line arguments containing:
             - name: Optional device name filter
             - timeout: Scan duration in seconds
-    
+
     Returns:
         0 on success, 1 if no devices found.
     """
@@ -118,12 +123,12 @@ def _cmd_scan(args: argparse.Namespace) -> int:
 
 def _cmd_setup(args: argparse.Namespace) -> int:
     """Set up a new printer profile with device pairing and signal learning.
-    
+
     Interactive setup that:
     1. Scans for the BLE device (or uses provided MAC)
     2. Learns the notify UUID by waiting for a button press
     3. Saves configuration to config.toml
-    
+
     Args:
         args: Parsed command-line arguments containing:
             - config: Path to config.toml
@@ -133,7 +138,7 @@ def _cmd_setup(args: argparse.Namespace) -> int:
             - timeout: Scan timeout in seconds
             - press_timeout: Time to wait for button press in seconds
             - verbose: Whether to print BLE payloads during learning
-    
+
     Returns:
         0 on success, 1 on failure.
     """
@@ -167,11 +172,11 @@ def _cmd_setup(args: argparse.Namespace) -> int:
 
 def _cmd_debug(args: argparse.Namespace) -> int:
     """Discover and log unknown BLE signals from a device.
-    
+
     Connects to a device and listens for all BLE notifications, logging
     their hex values. Useful for discovering new trigger signals or
     debugging connection issues.
-    
+
     Args:
         args: Parsed command-line arguments containing:
             - config: Path to config.toml
@@ -179,14 +184,14 @@ def _cmd_debug(args: argparse.Namespace) -> int:
             - mac: Optional MAC address (overrides profile config)
             - duration: Listen duration in seconds (0 = infinite)
             - update_config: Whether to auto-save discovered signals
-    
+
     Returns:
         0 on success, 1 on failure.
     """
 
     prof = load_profile(cfg_path, args.profile)
     mac = args.mac or prof.get("device", {}).get("mac")
-    
+
     if not mac:
         LOG.error(f"Profile '{args.profile}' has no MAC. Run setup first or provide --mac.")
         return 1
@@ -203,15 +208,35 @@ def _cmd_debug(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_tune(args: argparse.Namespace) -> int:
+    """Interactive camera tuning for a profile.
+
+    Launches an interactive menu for adjusting camera settings
+    (focus, exposure, color, etc.) with live test photo capture.
+
+    Args:
+        args: Parsed command-line arguments containing:
+            - config: Path to config.toml
+            - profile: Profile name to tune
+
+    Returns:
+        0 on success, 1 on failure.
+    """
+    cfg_path = Path(args.config).expanduser()
+    ensure_config_exists(cfg_path)
+
+    return tune.tune_profile(cfg_path, args.profile)
+
+
 def _cmd_run(args: argparse.Namespace) -> int:
     """Listen for shutter signals and capture photos.
-    
+
     Main operation mode. Connects to a configured BLE device and listens
     for trigger signals. On each trigger, captures a photo using rpicam-still
     with settings from the profile configuration.
-    
+
     Auto-reconnects on connection loss. Use Ctrl+C to stop.
-    
+
     Args:
         args: Parsed command-line arguments containing:
             - config: Path to config.toml
@@ -219,7 +244,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
             - dry_run: If True, logs triggers but doesn't capture photos
             - verbose: Whether to print BLE notification payloads
             - reconnect_delay: Seconds between reconnection attempts
-    
+
     Returns:
         0 on normal exit, 1 on error (typically not reached due to Ctrl+C).
     """
@@ -238,16 +263,18 @@ def _cmd_run(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> None:
     """Entry point for the CLI application.
-    
+
     Parses arguments, initializes logging, and dispatches to the appropriate
     command handler (scan, setup, debug, or run).
-    
+
     Args:
         argv: List of command-line arguments (defaults to sys.argv[1:])
-    
+
     Raises:
         SystemExit: With exit code 0 on success, 1 on error, 2 on bad arguments.
     """
+    parser = _build_parser()
+    args = parser.parse_args(argv)
 
     # Initialize logging early
     configure_logging(

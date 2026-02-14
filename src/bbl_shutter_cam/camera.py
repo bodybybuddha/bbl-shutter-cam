@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional
 @dataclass(frozen=True)
 class CameraConfig:
     """Immutable camera configuration derived from a profile.
-    
+
     Attributes:
         output_dir: Directory where captured images are stored
         filename_format: strftime format for image filenames (e.g. "%Y%m%d_%H%M%S.jpg")
@@ -37,6 +37,14 @@ class CameraConfig:
         shutter: Shutter speed in microseconds (locks exposure when set)
         gain: Analog gain (locks white balance when set)
         awbgains: White balance gains as "r,b" string (e.g. "1.5,1.8")
+        saturation: Saturation adjustment (float, typically 0.0 to 2.0)
+        contrast: Contrast adjustment (float, typically 0.0 to 2.0)
+        brightness: Brightness adjustment (float, typically -1.0 to 1.0)
+        metering: Metering mode ("centre", "spot", "matrix", "custom")
+        autofocus_mode: Autofocus mode ("auto", "manual", "continuous")
+        lens_position: Manual lens position (float, 0.0=infinity to ~32.0=close)
+        quality: JPEG quality (integer, 0-100)
+        timeout: Capture timeout in milliseconds
     """
     output_dir: str
     filename_format: str = "%Y%m%d_%H%M%S.jpg"
@@ -60,24 +68,36 @@ class CameraConfig:
     shutter: Optional[int] = None      # microseconds
     gain: Optional[float] = None
     awbgains: Optional[str] = None     # "1.5,1.8"
+    # Color & Tone adjustments
+    saturation: Optional[float] = None  # 0.0-2.0
+    contrast: Optional[float] = None    # 0.0-2.0
+    brightness: Optional[float] = None  # -1.0 to 1.0
 
+    # Metering & Focus
+    metering: Optional[str] = None      # "centre", "spot", "matrix", "custom"
+    autofocus_mode: Optional[str] = None  # "auto", "manual", "continuous"
+    lens_position: Optional[float] = None # 0.0 (infinity) to ~32.0 (close)
+
+    # Capture settings
+    quality: Optional[int] = None       # JPEG quality 0-100
+    timeout: Optional[int] = None       # milliseconds
 
 def camera_config_from_profile(profile: Dict[str, Any]) -> CameraConfig:
     """Load camera configuration from a profile dictionary.
-    
+
     Extracts camera settings from a profile dict (typically from config.py's
     load_profile()). Applies sensible defaults for any missing values.
-    
+
     Args:
         profile: Profile dictionary containing optional keys:
             - camera.output_dir: Image output directory
             - camera.filename_format: strftime format for filenames
             - camera.min_interval_sec: Minimum seconds between captures
             - camera.rpicam: Dict of rpicam-still options (width, height, etc.)
-    
+
     Returns:
         CameraConfig: Configured camera settings with defaults applied.
-    
+
     Example:
         >>> config = load_profile(path, "my-printer")
         >>> cam = camera_config_from_profile(config)
@@ -87,7 +107,10 @@ def camera_config_from_profile(profile: Dict[str, Any]) -> CameraConfig:
     cam = profile.get("camera", {}) or {}
     rp = cam.get("rpicam", {}) or {}
 
-    output_dir = cam.get("output_dir", str(Path.home() / "captures"))
+    # Default output_dir includes profile name to prevent file collision
+    profile_name = profile.get("_profile_name", "default")
+    default_output = str(Path.home() / "captures" / profile_name)
+    output_dir = cam.get("output_dir", default_output)
     filename_format = cam.get("filename_format", "%Y%m%d_%H%M%S.jpg")
     min_interval_sec = float(cam.get("min_interval_sec", 0.5))
 
@@ -108,21 +131,29 @@ def camera_config_from_profile(profile: Dict[str, Any]) -> CameraConfig:
         shutter=rp.get("shutter"),
         gain=rp.get("gain"),
         awbgains=rp.get("awbgains"),
+        saturation=rp.get("saturation"),
+        contrast=rp.get("contrast"),
+        brightness=rp.get("brightness"),
+        metering=rp.get("metering"),
+        autofocus_mode=rp.get("autofocus_mode"),
+        lens_position=rp.get("lens_position"),
+        quality=rp.get("quality"),
+        timeout=rp.get("timeout"),
     )
 
 
 def make_outfile(cam: CameraConfig) -> str:
     """Generate output filename and ensure output directory exists.
-    
+
     Uses the filename_format from config to create a timestamped filename
     in the configured output directory. Creates the directory if it doesn't exist.
-    
+
     Args:
         cam: CameraConfig instance with output_dir and filename_format
-    
+
     Returns:
         str: Absolute path to the output file (file does not exist yet)
-    
+
     Example:
         >>> cam = CameraConfig(output_dir="~/captures", filename_format="%Y%m%d_%H%M%S.jpg")
         >>> path = make_outfile(cam)
@@ -137,23 +168,23 @@ def make_outfile(cam: CameraConfig) -> str:
 
 def build_rpicam_still_cmd(cam: CameraConfig, outfile: str) -> List[str]:
     """Build an rpicam-still command from camera configuration.
-    
+
     Constructs the complete command-line arguments for rpicam-still based on
     the configuration. Only includes parameters that are explicitly set
     (None values are omitted).
-    
+
     Args:
         cam: CameraConfig with capture parameters
         outfile: Output file path (will be passed to -o flag)
-    
+
     Returns:
         List[str]: Complete command-line as list (ready for subprocess.run)
-    
+
     Example:
         >>> cam = CameraConfig(width=1920, height=1080, rotation=90)
         >>> cmd = build_rpicam_still_cmd(cam, "/tmp/test.jpg")
         >>> cmd
-        ['rpicam-still', '-o', '/tmp/test.jpg', '--width', '1920', 
+        ['rpicam-still', '-o', '/tmp/test.jpg', '--width', '1920',
          '--height', '1080', '--rotation', '90', '--nopreview']
     """
     cmd: List[str] = ["rpicam-still", "-o", outfile]
@@ -192,5 +223,25 @@ def build_rpicam_still_cmd(cam: CameraConfig, outfile: str) -> List[str]:
         cmd += ["--gain", str(cam.gain)]
     if cam.awbgains is not None:
         cmd += ["--awbgains", str(cam.awbgains)]
+    # Color & Tone
+    if cam.saturation is not None:
+        cmd += ["--saturation", str(cam.saturation)]
+    if cam.contrast is not None:
+        cmd += ["--contrast", str(cam.contrast)]
+    if cam.brightness is not None:
+        cmd += ["--brightness", str(cam.brightness)]
 
+    # Metering & Focus
+    if cam.metering is not None:
+        cmd += ["--metering", str(cam.metering)]
+    if cam.autofocus_mode is not None:
+        cmd += ["--autofocus-mode", str(cam.autofocus_mode)]
+    if cam.lens_position is not None:
+        cmd += ["--lens-position", str(cam.lens_position)]
+
+    # Capture settings
+    if cam.quality is not None:
+        cmd += ["--quality", str(cam.quality)]
+    if cam.timeout is not None:
+        cmd += ["--timeout", str(cam.timeout)]
     return cmd

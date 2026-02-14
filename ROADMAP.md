@@ -5,7 +5,61 @@ This document tracks development releases and features for the bbl-shutter-cam p
 
 ---
 
-# v0.1.0 - Alpha/Foundation Release
+# Released Versions
+
+## v0.3.1 - Bug Fix Release ✅ Released 2026-02-14
+
+**Milestone:** Fixed default output directory collision between profiles.
+
+### Fixed
+- Default output_dir now includes profile name to prevent file collision
+- Profiles without explicit `output_dir` setting now default to `~/captures/{profile_name}/`
+
+---
+
+## v0.3.0 - Interactive Camera Tuning ✅ Released 2026-02-14
+
+**Milestone:** Added interactive camera calibration for optimal image quality.
+
+### Completed Features
+- ✅ Interactive camera tuning with `bbl-shutter-cam tune` command
+- ✅ Headless-friendly menu system (SSH compatible)
+- ✅ Test photo capture with automatic numbering
+- ✅ Extended camera parameter support (focus, color, metering, quality)
+- ✅ Configuration save and rollback functionality
+- ✅ Comprehensive tuning documentation
+
+### Stages Completed in v0.3.0
+- Stage 2.6: Interactive Camera Calibration Mode
+
+---
+
+## v0.2.0 - Alpha Release ✅ Released 2026-02-14
+
+**Milestone:** First functional alpha release with core features complete.
+
+### Completed Features
+- ✅ BLE device discovery and pairing
+- ✅ Profile-based configuration system (TOML)
+- ✅ Multi-printer/multi-camera support
+- ✅ Dynamic signal discovery and auto-config updates
+- ✅ Event-based trigger system (configurable capture events)
+- ✅ Photo capture with rpicam-still integration
+- ✅ Comprehensive documentation with GitHub Pages
+- ✅ PyInstaller executable support (Windows, macOS, Linux)
+- ✅ CLI commands: `scan`, `setup`, `debug`, `run`
+- ✅ VSCode workspace configuration
+- ✅ Development tooling (black, pylint, mypy, pytest)
+
+### Stages Completed in v0.2.0
+- Stage 1: Foundation & Setup
+- Stage 2.5: Dynamic Signal Discovery & Event Configuration
+
+---
+
+# Development History
+
+## v0.1.0 - Planning & Foundation
 
 ## Stage 1: Foundation & Setup ✅ Complete
 
@@ -31,31 +85,11 @@ This document tracks development releases and features for the bbl-shutter-cam p
 - ✅ Created `logging_config.py` module for enhanced logging capabilities
 
 ### Not Yet Implemented
-- systemd service template (deferred to Stage 3)
+- systemd service template (deferred to Stage 4)
 
 ---
 
-## Stage 2: Hardware Detection & Multi-Machine Support 🔄 In Planning
-
-### Objectives
-- Implement automatic hardware detection (Pi model, camera type)
-- Create setup wizard for first-run configuration
-- Support multi-camera and multi-printer profiles
-
-### Planned Tasks
-- [ ] Detect Raspberry Pi hardware (model, OS version)
-- [ ] Detect camera type (rpicam, picamera, etc.)
-- [ ] Build interactive setup wizard
-- [ ] Validate config against detected hardware
-- [ ] Create hardware-specific presets
-- [ ] Document multi-machine deployment patterns
-
-### Dependencies
-- Requires completion of Stage 1 ✅
-
----
-
-## Stage 2.5: Dynamic Signal Discovery & Event Configuration 📋 Planned
+## Stage 2.5: Dynamic Signal Discovery & Event Configuration ✅ Complete (v0.2.0)
 
 ### Objectives
 - Integrate Bluetooth signal discovery into the main application
@@ -63,50 +97,61 @@ This document tracks development releases and features for the bbl-shutter-cam p
 - Store discovered signals in profile configuration
 - Enable flexible event-to-action mapping
 
-### Planned Tasks
-- [ ] Create integrated debug mode (`bbl-shutter-cam debug` or extend `scan`)
-  - Option A: Standalone `debug` subcommand
-  - Option B: Extend `scan` with `--debug-signals` flag
-- [ ] Capture and persist discovered signals:
-  - Discover new signal patterns during debug/scan mode
+### Completed Tasks
+- ✅ Created standalone `debug` subcommand with full signal capture
+- ✅ Capture and persist discovered signals:
+  - Discover new signal patterns during debug mode
   - Store signal-to-event mapping in config file per profile
-  - Update config with previously unseen signals
-- [ ] Implement event-based trigger system:
-  - Replace hardcoded `PRESS_BYTES` with configurable events
+  - Auto-update config with `--update-config` flag
+- ✅ Implemented event-based trigger system:
+  - Replaced hardcoded `PRESS_BYTES` with configurable events
   - Load trigger signals from profile config
   - Support multiple trigger signals per profile
-  - Exclude release events by default from photo capture
-- [ ] Enhanced event handling:
-  - Add `trigger_on_release` option (default: false)
-  - Add `capture_on_all_events` option (default: false)
-  - Document which events map to which actions
-- [ ] Update config schema:
-  - Add `[profiles.<name>.device.events]` section
-  - Store discovered signals with metadata (first seen, count, etc.)
-  - Add event filtering/action configuration options
-- [ ] Improve logging:
-  - Show which event triggered a capture
-  - Log discovered signals during debug mode
-  - Provide summary statistics at exit
+  - Exclude release events (0x0000) by default from photo capture
+- ✅ Enhanced event handling:
+  - Event capture flag per signal (`capture: true/false`)
+  - Load events dynamically from `device.events` config section
+  - Support for backward compatibility with defaults
+- ✅ Updated config schema:
+  - Added `[profiles.<name>.device.events]` array
+  - Store discovered signals with metadata (uuid, hex, count, capture flag)
+  - Event filtering via capture boolean
+- ✅ Improved logging:
+  - Show which event triggered a capture (by name or hex)
+  - Log discovered signals during debug mode with timestamps
+  - Provide detailed summary statistics at exit with signal counts
 
-### Configuration Example
+### Implemented Configuration Example
 ```toml
-[profiles.ps1-office.device.events]
-# Auto-discovered signals
-signals = [
-  { hex = "4000", name = "manual_button", capture = true },
-  { hex = "8000", name = "bambu_studio", capture = true },
-  { hex = "0000", name = "release", capture = false }
-]
+# Auto-discovered and stored in profile
+[[profiles.ps1-office.device.events]]
+uuid = "00002a4d-0000-1000-8000-00805f9b34fb"
+hex = "4000"
+count = 5
+capture = true
+
+[[profiles.ps1-office.device.events]]
+uuid = "00002a4d-0000-1000-8000-00805f9b34fb"
+hex = "8000"
+count = 3
+capture = true
+
+[[profiles.ps1-office.device.events]]
+uuid = "00002a4d-0000-1000-8000-00805f9b34fb"
+hex = "0000"
+count = 8
+capture = false
 ```
 
-### Dependencies
-- Requires debug_ble_traffic.py from v0.1.0 ✅
-- Leverages config.py infrastructure (Stage 1 ✅)
+### Implementation Details
+- Implemented in `discover.py::debug_signals()` and `discover.py::_update_config_with_signals()`
+- Config helpers in `config.py::get_trigger_events()` and `config.py::get_event_trigger_bytes()`
+- Full documentation at `docs/features/signal-discovery.md`
+- CLI integration via `cli.py::_cmd_debug()`
 
 ---
 
-## Stage 2.6: Interactive Camera Calibration Mode 📋 Planned
+## Stage 2.6: Interactive Camera Calibration Mode ✅ Complete (v0.4.0)
 
 ### Objectives
 - Provide interactive, headless-friendly camera tuning workflow
@@ -114,128 +159,42 @@ signals = [
 - Support Raspberry Pi Camera Module 3 NOIR specifics
 - Enable iterative photo capture and configuration updates
 
-### Planned Tasks
-- [ ] Create `bbl-shutter-cam tune --profile <name>` command
-- [ ] Build interactive tuning menu (headless-friendly)
+### Completed Tasks
+- ✅ Created `bbl-shutter-cam tune --profile <name>` command
+- ✅ Built interactive tuning menu (headless-friendly)
   - Multi-option menu with single-key navigation
-  - Show current settings and changes
-  - No dependencies on graphical display
-- [ ] Implement tuning categories:
+  - Show current settings and changes  - No dependencies on graphical display
+- ✅ Implemented tuning categories:
   - **Orientation**: Rotation (0/90/180/270), Flip H, Flip V
-  - **Focus**: Autofocus mode (auto/manual), Lens position (0.0-1.0)
-  - **Exposure & Color**: EV, AWB modes, Saturation, Sharpness
-  - **Noise & Speed**: ZSL (enable/disable), Denoise mode
-  - **Advanced**: ISO/Gain, Shutter speed, Metering mode
-  - **NOIR-Specific**: Low-light boost, IR sensitivity options
-- [ ] Capture workflow:
+  - **Focus**: Autofocus mode (auto/manual/continuous), Lens position (0.0-32.0)
+  - **Exposure & Color**: EV, AWB modes, Saturation, Contrast, Brightness, Sharpness
+  - **Noise & Quality**: Denoise mode, JPEG quality
+  - **Advanced**: Shutter speed, Gain, Metering mode
+- ✅ Capture workflow:
   - Take single test photo with current settings
   - Display file path for manual inspection (headless inspection via SFTP/SCP)
   - Return to menu for adjustments
-  - Support batch naming with settings identifier (e.g., `tune_ev0_awb-daylight.jpg`)
-- [ ] Configuration integration:
+  - Batch naming with counter and timestamp
+- ✅ Configuration integration:
   - Apply settings to camera config dataclass
   - Build rpicam-still command with tuned parameters
   - Save validated settings back to profile config
-  - Support rollback to previous settings
-- [ ] User guidance:
-  - Show recommended settings for NOIR in enclosures
-  - Explain each setting's impact on output
-  - Suggest starting points based on lighting conditions
-  - Document ZSL benefits for timelapse capture
+  - Support rollback to original settings
 
-### Configuration Tuning Options
-
-#### Orientation (Essential)
-- `rotation`: 0, 90, 180, 270
-- `hflip`: true/false
-- `vflip`: true/false
-
-#### Focus Control
-- `autofocus`: "auto" or "manual"
-- `lens_position`: 0.0 (infinity) to 1.0 (closest, ~8cm for Module 3)
-- `af_on_capture`: true/false (trigger AF before each shot)
-
-#### Exposure & Color
-- `ev`: -10 to +10 (exposure value)
-- `awb`: "auto", "daylight", "tungsten", "warm", "cool", "shade"
-- `saturation`: 0-2.0 (relative multiplier)
-- `sharpness`: 0-2.0 (relative multiplier)
-
-#### Speed & Noise
-- `zsl`: true/false (zero shutter lag / buffered capture)
-- `denoise`: "off", "fast", "hq"
-
-#### Advanced
-- `iso`: 100-800
-- `gain`: manual sensor gain value
-- `shutter`: microseconds (manual shutter speed)
-- `metering`: "center", "spot", "matrix", "custom"
-
-#### NOIR-Specific
-- `low_light_boost`: true/false
-- `lens_shading`: true/false (correction for edge darkening)
-
-### Configuration Example
-```toml
-[profiles.ps1-office.camera.rpicam]
-width = 1920
-height = 1080
-nopreview = true
-rotation = 0
-hflip = false
-vflip = false
-
-# ZSL for faster, more reliable timelapse
-zsl = true
-denoise = "hq"
-
-# Focus locked for consistent captures
-autofocus = "manual"
-lens_position = 0.5
-
-# Color & Exposure
-ev = 0
-awb = "daylight"
-saturation = 1.0
-sharpness = 0.5
-
-# NOIR Camera optimizations
-low_light_boost = true
-metering = "matrix"
-```
-
-### Interactive Menu Example (Headless)
-```
-=== Camera Calibration: ps1-office ===
-Last photo: /home/pi/captures/ps1-office/tune_001.jpg
-
-CURRENT SETTINGS:
-  Rotation: 0°      HFlip: No      VFlip: No
-  Focus: manual     Pos: 0.5       LowLight: Yes
-  EV: 0             AWB: daylight  Denoise: hq
-  ZSL: enabled      Saturation: 1.0
-
-ADJUST SETTINGS:
-  [R]otation | [H/V]flip | [F]ocus [P]osition | [E]V
-  [A]WB | [Sa]turation | [Sh]arpness | [D]enoise | [Z]SL
-  [L]ow-light | [Me]tering
-
-ACTIONS:
-  [T]ake photo | [C]ompare settings | [Sa]ve & exit | [Q]uit
-
-Choose option: _
-```
-
-### Dependencies
-- Requires camera.py module (Stage 1 ✅)
-- Requires config.py update (Stage 1 ✅)
-- Can run independently or after Stage 2.5
+### Implementation Details
+- New module: `tune.py` with `TuningSession` class
+- Extended `CameraConfig` dataclass with all tunable parameters
+- Updated `build_rpicam_still_cmd()` to support new parameters
+- CLI integration via `cli.py::_cmd_tune()`
+- Test photos saved to `<output_dir>/tune/` subdirectory
+- Updated documentation in `docs/user-guide/camera-settings.md`
+- Extended example config with all tunable parameters
 
 ---
 
-# Future Versions
+# Planned Future Development
 
-## Stage 3: Testing & CI/CD 📋 Planned
+## Stage 3: Testing & CI/CD 📋 Planned (v1.0.0)
 
 ### Objectives
 - Establish test infrastructure
@@ -257,46 +216,49 @@ Choose option: _
 
 ---
 
-## Stage 4: Systemd & Deployment 📋 Planned
-
-### Objectives
-- Enable reliable headless operation on Raspberry Pi
-- Create deployment templates and documentation
-
-### Planned Tasks
-- [ ] Create `bbl-shutter-cam.service` systemd template
-- [ ] Add systemd timer for scheduled restarts
-- [ ] Document service installation
-- [ ] Create systemd user service alternative
-- [ ] Add log rotation configuration
-
-### Dependencies
-- Requires logging config (Stage 1 ✅)
-- Requires hardware detection (Stage 2)
-
----
-
-## Stage 5: Documentation & Polish 📋 Planned
+## Stage 5: Documentation & Polish 📋 Planned (v1.0.0)
 
 ### Objectives
 - Comprehensive user and developer documentation
-- Future extensibility guide
+- Production-ready documentation and examples
 
 ### Planned Tasks
-- [ ] Write `docs/SETUP.md` (hardware prerequisites, installation)
-- [ ] Write `docs/CONFIGURATION.md` (profile management, camera settings)
-- [ ] Write `docs/TROUBLESHOOTING.md` (common issues, debug modes)
-- [ ] Create `CONTRIBUTING.md` (dev workflow, testing)
-- [ ] Create `CHANGELOG.md` (version history)
+- [ ] Enhance `docs/user-guide/` with comprehensive tutorials
+- [ ] Expand `docs/troubleshooting.md` with common issues and solutions
+- [ ] Update `CONTRIBUTING.md` with complete dev workflow
 - [ ] Add hardware-specific guides (Pi Zero 2 W, Pi 4, Pi 5)
 - [ ] Create example profiles for common setups
+- [ ] Polish existing documentation for clarity and completeness
+- [ ] Add FAQ section with real-world usage scenarios
 
 ### Dependencies
 - All prior stages
 
 ---
 
-## Stage 6: Extended Features 📋 Planned
+# Post-v1.0.0 Features
+
+## Future: Hardware Detection & Multi-Machine Support 📋 Planned (Post-v1)
+
+### Objectives
+- Implement automatic hardware detection (Pi model, camera type)
+- Create setup wizard for first-run configuration
+- Support multi-camera and multi-printer profiles
+
+### Planned Tasks
+- [ ] Detect Raspberry Pi hardware (model, OS version)
+- [ ] Detect camera type (rpicam, picamera, etc.)
+- [ ] Build interactive setup wizard
+- [ ] Validate config against detected hardware
+- [ ] Create hardware-specific presets
+- [ ] Document multi-machine deployment patterns
+
+### Dependencies
+- v1.0.0 release complete
+
+---
+
+## Future: Extended Features 📋 Planned (Post-v1)
 
 ### Objectives
 - Enhance core functionality based on user feedback
@@ -324,7 +286,9 @@ Choose option: _
 - Supports colored terminal output for development
 - File logging with rotation for production/headless
 - Compatible with existing `util.py` LOG infrastructure
-- Can integrate with systemd journal in Stage 4
+
+### Systemd Service (Removed from Roadmap)
+While bbl-shutter-cam is designed for headless operation on Raspberry Pi, it does not run as a persistent daemon or background service. The tool operates on-demand when triggered by Bluetooth signals from the printer. A systemd service template was considered but removed from the roadmap as it doesn't align with the tool's event-driven architecture.
 
 ### Multi-Machine Deployment
 - User configs stored in `~/.config/bbl-shutter-cam/config.toml`
@@ -334,27 +298,26 @@ Choose option: _
 
 ---
 
-## v0.1.0 Release Status
+## Release Timeline
 
-| Stage | Complexity | Est. Time | Status |
-|-------|-----------|-----------|--------|
-| 1 (Foundation) | Low | ✅ Complete | ✅ Done |
-| 2 (Hardware Detect) | Medium | 2-3 days | 🔄 In Progress |
+### Completed Releases
 
-**Target Release**: When Stage 2 is complete
+| Version | Date | Stages Completed | Status |
+|---------|------|------------------|--------|
+| v0.3.1 | 2026-02-14 | Bug Fix (output_dir default) | ✅ Released |
+| v0.3.0 | 2026-02-14 | Stage 2.6 (Camera Calibration) | ✅ Released |
+| v0.2.0 | 2026-02-14 | Stage 1, Stage 2.5 | ✅ Released |
+| v0.1.0 | Planning | Initial planning | ✅ Complete |
 
----
+### Planned Releases
 
-## Future Release Timeline
+| Version | Target | Planned Stages | Complexity |
+|---------|--------|----------------|------------|
+| v1.0.0 | TBD | Stage 3 (Testing/CI), Stage 5 (Documentation) | Medium |
 
-| Stage | Complexity | Est. Time | Target |
-|-------|-----------|-----------|--------|
-| 2.5 (Signal Discovery) | Medium | 3-4 days | v0.2.0 |
-| 2.6 (Camera Calibration) | Medium | 3-4 days | v0.2.0 |
-| 3 (Testing & CI/CD) | Medium | 3-4 days | v0.2.0 |
-| 4 (Systemd) | Low-Medium | 1-2 days | v0.2.0 or later |
-| 5 (Documentation) | Low | 2-3 days | v0.2.0 or later |
-| 6 (Extended Features) | High | 1-2 weeks | v1.0.0+ |
+### Post-v1.0.0 Development
+
+Future enhancements (Hardware Detection, Extended Features) will be planned after v1.0.0 release based on user feedback and requirements.
 
 ---
 
