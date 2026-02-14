@@ -184,6 +184,7 @@ class TestConfigureLogging:
         configure_logging(level="debug", fmt="plain")
 
         from bbl_shutter_cam.util import LOG
+
         assert LOG.level == LogLevel.DEBUG
 
     def test_sets_info_level(self):
@@ -191,6 +192,7 @@ class TestConfigureLogging:
         configure_logging(level="info", fmt="plain")
 
         from bbl_shutter_cam.util import LOG
+
         assert LOG.level == LogLevel.INFO
 
     def test_sets_warning_level(self):
@@ -198,6 +200,7 @@ class TestConfigureLogging:
         configure_logging(level="warning", fmt="plain")
 
         from bbl_shutter_cam.util import LOG
+
         assert LOG.level == LogLevel.WARNING
 
     def test_accepts_warn_as_alias(self):
@@ -205,6 +208,7 @@ class TestConfigureLogging:
         configure_logging(level="warn", fmt="plain")
 
         from bbl_shutter_cam.util import LOG
+
         assert LOG.level == LogLevel.WARNING
 
     def test_sets_error_level(self):
@@ -212,6 +216,7 @@ class TestConfigureLogging:
         configure_logging(level="error", fmt="plain")
 
         from bbl_shutter_cam.util import LOG
+
         assert LOG.level == LogLevel.ERROR
 
     def test_case_insensitive(self):
@@ -219,6 +224,7 @@ class TestConfigureLogging:
         configure_logging(level="DEBUG", fmt="plain")
 
         from bbl_shutter_cam.util import LOG
+
         assert LOG.level == LogLevel.DEBUG
 
     def test_raises_on_invalid_level(self):
@@ -231,6 +237,7 @@ class TestConfigureLogging:
         configure_logging(level="info", fmt="plain")
 
         from bbl_shutter_cam.util import LOG
+
         assert LOG.fmt == "plain"
 
     def test_sets_time_format(self):
@@ -238,6 +245,7 @@ class TestConfigureLogging:
         configure_logging(level="info", fmt="time")
 
         from bbl_shutter_cam.util import LOG
+
         assert LOG.fmt == "time"
 
     def test_raises_on_invalid_format(self):

@@ -233,8 +233,16 @@ class TestGetTriggerEvents:
         profile = {
             "device": {
                 "events": [
-                    {"uuid": "00002a4d-0000-1000-8000-00805f9b34fb", "hex": "4000", "capture": True},
-                    {"uuid": "00002a4d-0000-1000-8000-00805f9b34fb", "hex": "0000", "capture": False},
+                    {
+                        "uuid": "00002a4d-0000-1000-8000-00805f9b34fb",
+                        "hex": "4000",
+                        "capture": True,
+                    },
+                    {
+                        "uuid": "00002a4d-0000-1000-8000-00805f9b34fb",
+                        "hex": "0000",
+                        "capture": False,
+                    },
                 ]
             }
         }
@@ -297,11 +305,7 @@ class TestGetEventTriggerBytes:
 
     def test_converts_hex_to_bytes(self):
         """Should correctly convert hex strings to bytes."""
-        profile = {
-            "device": {
-                "events": [{"hex": "abcd", "capture": True}]
-            }
-        }
+        profile = {"device": {"events": [{"hex": "abcd", "capture": True}]}}
 
         result = get_event_trigger_bytes(profile)
 

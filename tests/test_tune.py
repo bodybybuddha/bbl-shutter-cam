@@ -128,21 +128,23 @@ def test_handle_multiple_settings_valid(monkeypatch, tmp_path):
 
     session = tune.TuningSession(config_path, "office")
 
-    inputs = iter([
-        "2",        # autofocus_mode -> manual
-        "8.5",      # lens_position
-        "1",        # ev
-        "2",        # awb -> daylight
-        "1.5",      # saturation
-        "1.2",      # contrast
-        "0.1",      # brightness
-        "1.3",      # sharpness
-        "3",        # denoise -> cdn_fast
-        "2",        # metering -> spot
-        "90",       # quality
-        "10000",    # shutter
-        "2.5",      # gain
-    ])
+    inputs = iter(
+        [
+            "2",  # autofocus_mode -> manual
+            "8.5",  # lens_position
+            "1",  # ev
+            "2",  # awb -> daylight
+            "1.5",  # saturation
+            "1.2",  # contrast
+            "0.1",  # brightness
+            "1.3",  # sharpness
+            "3",  # denoise -> cdn_fast
+            "2",  # metering -> spot
+            "90",  # quality
+            "10000",  # shutter
+            "2.5",  # gain
+        ]
+    )
     monkeypatch.setattr("builtins.input", lambda _="": next(inputs))
 
     tune.handle_autofocus_mode(session)

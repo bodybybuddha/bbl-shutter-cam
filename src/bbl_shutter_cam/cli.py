@@ -63,21 +63,39 @@ def _build_parser() -> argparse.ArgumentParser:
     scan.set_defaults(func=_cmd_scan)
 
     # setup
-    setup = sub.add_parser("setup", help="Create/update a profile and learn notify UUID by pressing the shutter")
+    setup = sub.add_parser(
+        "setup", help="Create/update a profile and learn notify UUID by pressing the shutter"
+    )
     setup.add_argument("--profile", required=True, help="Profile name (e.g. p1s-office)")
-    setup.add_argument("--name", default="BBL_SHUTTER", help="Device name to look for (default: BBL_SHUTTER)")
+    setup.add_argument(
+        "--name", default="BBL_SHUTTER", help="Device name to look for (default: BBL_SHUTTER)"
+    )
     setup.add_argument("--mac", default=None, help="Override: use this MAC instead of scanning")
     setup.add_argument("--timeout", type=float, default=10.0, help="Scan timeout seconds")
-    setup.add_argument("--press-timeout", type=float, default=30.0, help="Seconds to wait for a shutter press")
-    setup.add_argument("--verbose", action="store_true", help="Print BLE notify payloads while learning")
+    setup.add_argument(
+        "--press-timeout", type=float, default=30.0, help="Seconds to wait for a shutter press"
+    )
+    setup.add_argument(
+        "--verbose", action="store_true", help="Print BLE notify payloads while learning"
+    )
     setup.set_defaults(func=_cmd_setup)
 
     # debug
-    debug = sub.add_parser("debug", help="Capture all BLE signals to discover unknown triggers and update config")
+    debug = sub.add_parser(
+        "debug", help="Capture all BLE signals to discover unknown triggers and update config"
+    )
     debug.add_argument("--profile", required=True, help="Profile name (e.g. p1s-office)")
-    debug.add_argument("--mac", default=None, help="Override: use this MAC instead of pulling from profile")
-    debug.add_argument("--duration", type=float, default=120.0, help="Listen duration seconds (0 = infinite)")
-    debug.add_argument("--update-config", action="store_true", help="Automatically update config with discovered signals")
+    debug.add_argument(
+        "--mac", default=None, help="Override: use this MAC instead of pulling from profile"
+    )
+    debug.add_argument(
+        "--duration", type=float, default=120.0, help="Listen duration seconds (0 = infinite)"
+    )
+    debug.add_argument(
+        "--update-config",
+        action="store_true",
+        help="Automatically update config with discovered signals",
+    )
     debug.set_defaults(func=_cmd_debug)
 
     # tune
@@ -87,10 +105,14 @@ def _build_parser() -> argparse.ArgumentParser:
 
     # run
     run = sub.add_parser("run", help="Run listener for a profile")
-    run.add_argument("--profile", default=None, help="Profile name (default: config default_profile)")
+    run.add_argument(
+        "--profile", default=None, help="Profile name (default: config default_profile)"
+    )
     run.add_argument("--dry-run", action="store_true", help="Log presses but do not capture photos")
     run.add_argument("--verbose", action="store_true", help="Print BLE notification payloads")
-    run.add_argument("--reconnect-delay", type=float, default=2.0, help="Seconds between reconnect attempts")
+    run.add_argument(
+        "--reconnect-delay", type=float, default=2.0, help="Seconds between reconnect attempts"
+    )
     run.set_defaults(func=_cmd_run)
 
     return p

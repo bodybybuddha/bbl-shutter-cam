@@ -11,6 +11,7 @@ class FakeDevice:
         self.name = name
         self.address = address
 
+
 def test_build_parser_requires_command():
     parser = cli._build_parser()
     with pytest.raises(SystemExit):
@@ -125,7 +126,11 @@ def test_cmd_run_invokes_discover(monkeypatch, tmp_path):
         return None
 
     monkeypatch.setattr(cli, "ensure_config_exists", lambda _path: None)
-    monkeypatch.setattr(cli, "load_profile", lambda _path, _name: {"device": {"mac": "AA:BB", "notify_uuid": "uuid"}})
+    monkeypatch.setattr(
+        cli,
+        "load_profile",
+        lambda _path, _name: {"device": {"mac": "AA:BB", "notify_uuid": "uuid"}},
+    )
     monkeypatch.setattr(cli.discover, "run_profile", fake_run_profile)
 
     args = argparse.Namespace(

@@ -25,6 +25,7 @@ class LogLevel(IntEnum):
         WARNING: 30 - Warning messages for potentially problematic situations
         ERROR: 40 - Error messages for serious problems
     """
+
     DEBUG = 10
     INFO = 20
     WARNING = 30
@@ -54,6 +55,7 @@ class Logger:
         >>> LOG.info("Starting application")
         2026-02-14 12:34:56 [=] Starting application
     """
+
     level: LogLevel = LogLevel.INFO
     fmt: str = "plain"  # "plain" | "time"
     file: Optional[TextIO] = None

@@ -46,6 +46,7 @@ class CameraConfig:
         quality: JPEG quality (integer, 0-100)
         timeout: Capture timeout in milliseconds
     """
+
     output_dir: str
     filename_format: str = "%Y%m%d_%H%M%S.jpg"
     min_interval_sec: float = 0.5
@@ -59,28 +60,29 @@ class CameraConfig:
     hflip: bool = False
     vflip: bool = False
 
-    awb: Optional[str] = None       # e.g. "auto", "daylight", "tungsten"
-    ev: Optional[int] = None        # exposure compensation integer
-    denoise: Optional[str] = None   # e.g. "cdn_off"
+    awb: Optional[str] = None  # e.g. "auto", "daylight", "tungsten"
+    ev: Optional[int] = None  # exposure compensation integer
+    denoise: Optional[str] = None  # e.g. "cdn_off"
     sharpness: Optional[float] = None
 
     # Manual-ish “locks” (set these to freeze exposure/white balance)
-    shutter: Optional[int] = None      # microseconds
+    shutter: Optional[int] = None  # microseconds
     gain: Optional[float] = None
-    awbgains: Optional[str] = None     # "1.5,1.8"
+    awbgains: Optional[str] = None  # "1.5,1.8"
     # Color & Tone adjustments
     saturation: Optional[float] = None  # 0.0-2.0
-    contrast: Optional[float] = None    # 0.0-2.0
+    contrast: Optional[float] = None  # 0.0-2.0
     brightness: Optional[float] = None  # -1.0 to 1.0
 
     # Metering & Focus
-    metering: Optional[str] = None      # "centre", "spot", "matrix", "custom"
+    metering: Optional[str] = None  # "centre", "spot", "matrix", "custom"
     autofocus_mode: Optional[str] = None  # "auto", "manual", "continuous"
-    lens_position: Optional[float] = None # 0.0 (infinity) to ~32.0 (close)
+    lens_position: Optional[float] = None  # 0.0 (infinity) to ~32.0 (close)
 
     # Capture settings
-    quality: Optional[int] = None       # JPEG quality 0-100
-    timeout: Optional[int] = None       # milliseconds
+    quality: Optional[int] = None  # JPEG quality 0-100
+    timeout: Optional[int] = None  # milliseconds
+
 
 def camera_config_from_profile(profile: Dict[str, Any]) -> CameraConfig:
     """Load camera configuration from a profile dictionary.
