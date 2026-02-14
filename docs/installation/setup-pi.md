@@ -86,7 +86,7 @@ Scanning ...
 
 If you see `BBL_SHUTTER`, Bluetooth works! ✅
 
-**Issue?** → See [Bluetooth Not Working](troubleshoot-setup.md#bluetooth-not-working)
+**Issue?** → See [Bluetooth Not Working](troubleshoot-setup.md#bluetooth-not-working) or the detailed [Bluetooth Setup Guide](bluetooth-setup.md) for comprehensive pairing instructions.
 
 ---
 
@@ -178,6 +178,8 @@ The tool will:
 [+] Then: run for real
     bbl-shutter-cam run --profile my-printer
 ```
+
+**Connection issues?** → See the detailed [Bluetooth Setup Guide](bluetooth-setup.md) for step-by-step Bluetooth pairing and troubleshooting.
 
 ---
 

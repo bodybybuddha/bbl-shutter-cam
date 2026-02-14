@@ -1,265 +1,204 @@
 # bbl-shutter-cam
 
-Use a **Bambu Lab CyberBrick / BBL_SHUTTER Bluetooth shutter** to trigger photos on a **Raspberry Pi (Zero 2 W recommended)** using `rpicam-still`.
+Use a **Bambu Lab CyberBrick / BBL_SHUTTER Bluetooth shutter** to trigger photos on a **Raspberry Pi** using `rpicam-still`.
 
-This project is designed for **headless, reliable time‑lapse capture** inside 3D‑printer enclosures and similar setups.
+**Perfect for:** Headless, reliable time-lapse capture inside 3D printer enclosures with support for multiple printers/cameras through profile-based configuration.
 
----
-
-## What this does
-
-* Pairs a Raspberry Pi with the **BBL_SHUTTER** (CyberBrick Time‑Lapse Kit)
-* Listens for the shutter press BLE notification
-* Triggers `rpicam-still` on each press
-* Supports multiple printer/camera profiles via TOML
-* Runs headless with optional log files
+![Status Badge](https://img.shields.io/badge/Status-Alpha-orange)
+![License](https://img.shields.io/badge/License-MIT-green)
+[![GitHub Release](https://img.shields.io/github/release/bodybybuddha/bbl-shutter-cam.svg?style=flat)](https://github.com/bodybybuddha/bbl-shutter-cam/releases)
 
 ---
 
-## Requirements
+## What This Does
 
-### Hardware
-
-* Raspberry Pi Zero 2 W (recommended)
-* Raspberry Pi camera (v2 / HQ / compatible libcamera device)
-* Bambu Lab CyberBrick Time‑Lapse Kit (BBL_SHUTTER)
-
-### Software
-
-* Raspberry Pi OS Lite (Bookworm recommended)
-* Python 3.9+
-* `libcamera-apps` (for `rpicam-still`)
-* Bluetooth enabled (`bluez`)
+- 🎥 **BLE Listening** - Pairs with BBL_SHUTTER and listens for shutter signals
+- 📸 **Auto Capture** - Triggers `rpicam-still` on each press (configurable)
+- 🔧 **Multi-Printer** - Manage multiple printers/cameras with profiles
+- 🔋 **Headless** - Runs without GUI; optional systemd auto-start
+- 📝 **Config-Driven** - TOML profiles for easy setup and tweaking
+- 🎯 **Smart Debounce** - Prevents accidental double-triggers
+- 📊 **Signal Discovery** - Auto-detect unknown BLE triggers
 
 ---
 
-## Install system dependencies
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
-sudo apt update
-sudo apt install -y \
-  python3 \
-  python3-venv \
-  python3-pip \
-  bluetooth \
-  bluez \
-  libcamera-apps
+sudo apt update && sudo apt install -y \
+  python3 python3-venv python3-pip \
+  bluetooth bluez libcamera-apps
 ```
 
-Enable Bluetooth:
+### 2. Install bbl-shutter-cam
 
+**Option A: Standalone Executable** (Recommended - no Python needed)
 ```bash
-sudo systemctl enable bluetooth
-sudo systemctl start bluetooth
+# Download from GitHub Releases:
+# https://github.com/bodybybuddha/bbl-shutter-cam/releases
+chmod +x bbl-shutter-cam
+./bbl-shutter-cam --help
 ```
 
----
-
-## Pairing the BBL_SHUTTER
-
-Some tips on the use of **bluetoothctl** can be found here: [raspberry-pi-bluetooth-setup](https://raspberrytips.com/raspberry-pi-bluetooth-setup/)
-
-The below is just some notes on how to get it to work.  Need to update it a bit more with some details.  For instance, need to make sure bluetooth isn't blocked.  In addition, once a the time-lapse kit is paired, need to trust the device.
-
-Put the CyberBrick Time‑Lapse Kit into pairing mode, then:
-
+**Option B: From Source**
 ```bash
-bluetoothctl
-```
-
-Inside the prompt:
-
-```text
-power on
-agent on
-default-agent
-scan on
-```
-
-When you see `BBL_SHUTTER`, note the MAC address, then:
-
-```text
-pair XX:XX:XX:XX:XX:XX
-trust XX:XX:XX:XX:XX:XX
-connect XX:XX:XX:XX:XX:XX
-exit
-```
-
-> Pairing only needs to be done **once**. The device will reconnect automatically when awake.
-
----
-
-## Install bbl-shutter-cam (Two Options)
-
-### Option 1: From Source (Development)
-
-From the repository root:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -U pip
+python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
-```
-
-Verify:
-
-```bash
 bbl-shutter-cam --help
 ```
 
-### Option 2: Standalone Executable (Recommended for Users)
+### 3. Pair Your Device
 
-Pre-built executables for Windows, macOS, and Linux are available in [Releases](https://github.com/bodybybuddha/bbl-shutter-cam/releases).
+[Complete Bluetooth setup guide →](https://bodybybuddha.github.io/bbl-shutter-cam/installation/bluetooth-setup/)
 
-Simply download the executable for your platform and run it—no Python installation needed!
-
-To build your own executable:
-
+Quick overview:
 ```bash
-pip install -e ".[dev]"
-./scripts/build.sh      # macOS / Linux
-# or
-scripts\build.bat       # Windows
+sudo bluetoothctl
+# power on
+# agent on
+# scan on
+# [wait for BBL_SHUTTER]
+# pair AA:BB:CC:DD:EE:FF
+# trust AA:BB:CC:DD:EE:FF
+# quit
 ```
 
-See [Building Executables](docs/advanced/building-executables.md) for details.
+### 4. Configure & Run
+
+```bash
+# Setup first time (learns shutter signal)
+bbl-shutter-cam setup --profile my-printer
+
+# Test (no photos taken)
+bbl-shutter-cam run --profile my-printer --dry-run --verbose
+
+# Run for real
+bbl-shutter-cam run --profile my-printer
+```
+
+Photos save to `~/.config/bbl-shutter-cam/config.toml` output directory.
 
 ---
 
-## Configuration
+## Documentation
 
-An example configuration is provided:
+**Installation & Setup:**
+- [Hardware & Software Requirements](https://bodybybuddha.github.io/bbl-shutter-cam/installation/requirements/)
+- [Bluetooth Setup Detailed Guide](https://bodybybuddha.github.io/bbl-shutter-cam/installation/bluetooth-setup/)
+- [Raspberry Pi System Setup](https://bodybybuddha.github.io/bbl-shutter-cam/installation/setup-pi/)
 
-```text
-examples/config.example.toml
-```
+**Using bbl-shutter-cam:**
+- [Quick Start Guide](https://bodybybuddha.github.io/bbl-shutter-cam/user-guide/quick-start/)
+- [Profiles & Configuration](https://bodybybuddha.github.io/bbl-shutter-cam/user-guide/profiles/)
+- [Camera Settings & Tuning](https://bodybybuddha.github.io/bbl-shutter-cam/user-guide/camera-settings/)
+- [Signal Discovery](https://bodybybuddha.github.io/bbl-shutter-cam/features/signal-discovery/)
 
-Copy it to:
+**Advanced:**
+- [Headless Operation & Systemd](https://bodybybuddha.github.io/bbl-shutter-cam/advanced/headless-operation/)
+- [Building Standalone Executables](https://bodybybuddha.github.io/bbl-shutter-cam/advanced/building-executables/)
+- [Code Architecture & Extending](https://bodybybuddha.github.io/bbl-shutter-cam/advanced/extending/)
 
-```bash
-mkdir -p ~/.config/bbl-shutter-cam
-cp examples/config.example.toml ~/.config/bbl-shutter-cam/config.toml
-```
-
-Edit the file to match your camera orientation, lighting, and output directory.
-
-Multiple printer/camera setups can be defined as **profiles**.
+**Help:**
+- [Troubleshooting](https://bodybybuddha.github.io/bbl-shutter-cam/troubleshooting/)
+- [FAQ](https://bodybybuddha.github.io/bbl-shutter-cam/faq/)
 
 ---
 
-## Initial setup (learn the shutter UUID)
+## Features & Configuration
 
-Run setup once per profile:
+### Profiles
+
+Multiple printer setups via named profiles:
 
 ```bash
 bbl-shutter-cam setup --profile p1s-office
-```
-
-You will be prompted to **press the shutter button**. The tool will learn which BLE notify UUID corresponds to the press event and store it in the config.
-
----
-
-## Run (dry‑run first)
-
-Dry run (no photos taken):
-
-```bash
-bbl-shutter-cam run --profile p1s-office --dry-run --verbose
-```
-
-You should see log output when the shutter is pressed.
-
----
-
-## Run for real
-
-```bash
+bbl-shutter-cam setup --profile p1s-workshop
 bbl-shutter-cam run --profile p1s-office
 ```
 
-Photos will be saved to the configured output directory.
+### Camera Options
 
----
+- Resolution (width, height)
+- Rotation (0°/90°/180°/270°)
+- Flip (horizontal, vertical)
+- Exposure (EV compensation, shutter speed, manual gain)
+- White balance (auto, daylight, tungsten, custom gains)
+- Denoising, sharpness, and other rpicam-still options
 
-## Logging & Troubleshooting
+See [Camera Settings](https://bodybybuddha.github.io/bbl-shutter-cam/user-guide/camera-settings/) for all options.
 
-### Log level
+### Signal Discovery
 
-```bash
-bbl-shutter-cam --log-level debug run --profile p1s-office
-```
-
-Levels:
-
-* `debug` – BLE retries, notify subscriptions, camera commands
-* `info` – normal operation (default)
-* `warning` – warnings only
-* `error` – errors only
-
----
-
-### Log format
-
-Enable timestamps:
+Auto-detect new trigger signals:
 
 ```bash
-bbl-shutter-cam --log-format time run --profile p1s-office
+bbl-shutter-cam debug --profile my-printer --duration 120 --update-config
 ```
+
+Captures all BLE signals while you trigger the shutter or Bambu Studio app and saves them to config.
 
 ---
 
-### Log file (recommended for headless use)
+## Tips & Best Practices
 
-```bash
-bbl-shutter-cam \
-  --log-level debug \
-  --log-format time \
-  --log-file ~/.log/bbl-shutter-cam.log \
-  run --profile p1s-office --verbose
-```
-
-Log directories are created automatically.
-
----
-
-## Notes & tips
-
-* BLE devices may only connect when awake — press the shutter if reconnects stall
-* Use fixed shutter/gain settings to avoid enclosure flicker
-* `min_interval_sec` prevents accidental double‑triggers
+- **BLE Connection Issues?** Press the shutter button to wake the device
+- **Prevent Double Captures?** Adjust `min_interval_sec` in camera config (default: 0.5s)
+- **Varying Enclosure Lighting?** Lock exposure with manual `shutter` and `gain` settings
+- **Headless Setup?** Use `--log-file` for debugging on remote systems
+- **Auto-Start?** See [Systemd Service](https://bodybybuddha.github.io/bbl-shutter-cam/advanced/headless-operation/#systemd-auto-start)
 
 ---
 
 ## Contributing
 
-Interested in contributing? See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-
-- Setting up your development environment
-- Running tests and building executables
+Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Development setup
+- Code style & testing
 - VSCode workspace configuration
-- Code style guidelines
-- Submitting pull requests
+- Submitting changes
 
-Quick start:
-
+Quick start for developers:
 ```bash
 pip install -e ".[dev]"
-python -m pytest tests/ -v
+python -m pytest tests/ -v          # Run tests
+./scripts/build.sh                  # Build executable
 ```
 
 ---
 
-## License
+## License & Status
 
-MIT
+**License:** MIT (see [LICENSE](LICENSE))
+
+**Status:** Alpha - actively developed
+
+**Roadmap:** See [ROADMAP.md](ROADMAP.md) for planned features:
+- Camera calibration mode
+- Web-based UI
+- Multi-camera support
+- Unit tests & CI/CD
 
 ---
 
-## Status
+## GitHub
 
-This project is **actively developed** and designed to be extended with:
+- **Repository:** https://github.com/bodybybuddha/bbl-shutter-cam
+- **Issues & Bugs:** [GitHub Issues](https://github.com/bodybybuddha/bbl-shutter-cam/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/bodybybuddha/bbl-shutter-cam/discussions)
 
-* Camera presets
-* systemd service support
-* Multi‑camera setups
+---
+
+## System Requirements
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| **Raspberry Pi** | Pi 3B+ | Pi Zero 2 W or Pi 5 |
+| **OS** | Bullseye | Bookworm (Lite) |
+| **Python** | 3.9 | 3.11+ |
+| **Camera** | libcamera compatible | Pi Camera Module 3 |
+| **Bluetooth** | Built-in/USB adapter | Built-in module |
+
+See [Requirements](https://bodybybuddha.github.io/bbl-shutter-cam/installation/requirements/) for full details.
+

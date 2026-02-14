@@ -32,6 +32,7 @@ parent: Installation
 - Must include the **BBL_SHUTTER** Bluetooth button/sensor
 - Firmware version: Recent (tested with 2024+ firmware)
 - Signal compatibility: Manual button press (0x4000), Bambu Studio app (0x8000)
+- **Setup**:  See the [Bluetooth Setup Guide](bluetooth-setup.md) for detailed pairing instructions
 
 ### Power & Connectivity
 
