@@ -110,6 +110,8 @@ def _cmd_scan(args: argparse.Namespace) -> int:
     Returns:
         0 on success, 1 if no devices found.
     """
+    devices = asyncio.run(discover.scan(name_filter=args.name, timeout=args.timeout))
+
     if not devices:
         LOG.warning("No BLE devices found (or none matching).")
         return 1
@@ -142,6 +144,8 @@ def _cmd_setup(args: argparse.Namespace) -> int:
     Returns:
         0 on success, 1 on failure.
     """
+    cfg_path = Path(args.config).expanduser()
+    ensure_config_exists(cfg_path)
 
     result = asyncio.run(
         discover.setup_profile(
@@ -188,6 +192,8 @@ def _cmd_debug(args: argparse.Namespace) -> int:
     Returns:
         0 on success, 1 on failure.
     """
+    cfg_path = Path(args.config).expanduser()
+    ensure_config_exists(cfg_path)
 
     prof = load_profile(cfg_path, args.profile)
     mac = args.mac or prof.get("device", {}).get("mac")
@@ -248,6 +254,8 @@ def _cmd_run(args: argparse.Namespace) -> int:
     Returns:
         0 on normal exit, 1 on error (typically not reached due to Ctrl+C).
     """
+    cfg_path = Path(args.config).expanduser()
+    ensure_config_exists(cfg_path)
 
     prof = load_profile(cfg_path, args.profile)
     asyncio.run(
