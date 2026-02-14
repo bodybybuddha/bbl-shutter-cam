@@ -139,7 +139,10 @@ def load_profile(path: Path, profile_name: str | None) -> Dict[str, Any]:
         KeyError: If profile_name is not found or default_profile not set
 
     Example:
-        >>> prof = load_profile(Path.home() / ".config" / "bbl-shutter-cam" / "config.toml", "office")
+        >>> prof = load_profile(
+        ...     Path.home() / ".config" / "bbl-shutter-cam" / "config.toml",
+        ...     "office",
+        ... )
         >>> mac = prof["device"]["mac"]
         >>> width = prof["camera"]["rpicam"]["width"]
     """

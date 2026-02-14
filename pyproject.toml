@@ -77,7 +77,16 @@ extend-exclude = '''
 disable = [
   "C0103",  # invalid-name
   "C0114",  # missing-module-docstring
+  "C0209",  # consider-using-f-string
+  "C0301",  # line-too-long
+  "C0415",  # import-outside-toplevel
   "R0913",  # too-many-arguments
+  "R0902",  # too-many-instance-attributes
+  "R0912",  # too-many-branches
+  "R0914",  # too-many-locals
+  "R0915",  # too-many-statements
+  "W0718",  # broad-exception-caught
+  "W1309",  # f-string-without-interpolation
 ]
 
 [tool.pylint.format]

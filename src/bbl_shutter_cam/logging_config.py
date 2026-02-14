@@ -6,7 +6,6 @@ for different deployment scenarios (development, headless, systemd).
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -91,7 +90,7 @@ def setup_logging(
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
 
-        logger.info(f"Logging to file: {log_path}")
+        logger.info("Logging to file: %s", log_path)
 
     return logger
 

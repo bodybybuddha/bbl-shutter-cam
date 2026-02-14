@@ -22,11 +22,8 @@ from .camera import build_rpicam_still_cmd, camera_config_from_profile, make_out
 from .config import update_profile_device_fields
 from .util import LOG
 
-# Deprecated: Use dynamically loaded events from config instead.
-# Kept for reference / backward compatibility only.
-# PRESS_BYTES = b"\x40\x00"              # Manual button press
-# BAMBU_STUDIO_TRIGGER = b"\x80\x00"      # Bambu Studio app trigger
-# RELEASE_BYTES = b"\x00\x00"
+# Default press bytes for notify UUID learning.
+PRESS_BYTES = b"\x40\x00"  # Manual button press
 
 
 async def scan(name_filter: Optional[str] = None, timeout: float = 8.0):

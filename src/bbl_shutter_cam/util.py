@@ -160,7 +160,9 @@ def configure_logging(
     if log_file:
         path = Path(log_file).expanduser()
         path.parent.mkdir(parents=True, exist_ok=True)
-        LOG.file = path.open("a", buffering=1)
+        LOG.file = path.open(
+            "a", buffering=1, encoding="utf-8"
+        )  # pylint: disable=consider-using-with
         LOG.debug(f"Logging to file: {path}")
 
 
@@ -220,6 +222,12 @@ def safe_get(d: dict, keys: Iterable[str], default: Any = None) -> Any:
         >>> safe_get(config, ["server", "ssl"], default=False)
         False
     """
+    cur: Any = d
+    for key in keys:
+        if not isinstance(cur, dict) or key not in cur:
+            return default
+        cur = cur[key]
+    return cur
 
 
 def fmt_kv(title: str, value: Optional[Any]) -> str:
@@ -240,3 +248,4 @@ def fmt_kv(title: str, value: Optional[Any]) -> str:
         >>> fmt_kv("Optional", None)
         'Optional: '
     """
+    return f"{title}: {'' if value is None else value}"

@@ -13,14 +13,13 @@ making it suitable for SSH/headless operation.
 from __future__ import annotations
 
 import subprocess
-import sys
-from dataclasses import asdict, replace
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
-from .camera import CameraConfig, build_rpicam_still_cmd, camera_config_from_profile
-from .config import DEFAULT_CONFIG_PATH, load_config, load_profile, save_config
+from .camera import build_rpicam_still_cmd, camera_config_from_profile
+from .config import load_config, load_profile, save_config
 from .util import LOG
 
 

@@ -315,7 +315,7 @@ def main(argv: list[str] | None = None) -> None:
     LOG.debug(f"Using config: {args.config}")
 
     func = getattr(args, "func", None)
-    if not func:
+    if not callable(func):
         parser.print_help()
         raise SystemExit(2)
 

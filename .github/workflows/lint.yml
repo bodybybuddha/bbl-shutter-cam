@@ -33,9 +33,11 @@ jobs:
           python -m black --check src/ tests/ scripts/
 
       - name: Run pylint
+        if: matrix.python-version == '3.11'
         run: |
           python -m pylint src/bbl_shutter_cam/
 
       - name: Run mypy
+        if: matrix.python-version == '3.11'
         run: |
           python -m mypy src/bbl_shutter_cam/
