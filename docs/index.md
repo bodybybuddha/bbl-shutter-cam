@@ -112,7 +112,7 @@ sftp pi@raspberrypi.local
 
 ## Project Status
 
-**Current Version:** v0.1.0 (Alpha)
+**Current Version:** v0.2.0 (Alpha)
 
 ### Implemented Features
 - ✅ BLE device discovery & setup
