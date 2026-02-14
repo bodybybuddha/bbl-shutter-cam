@@ -38,6 +38,7 @@ dev = [
   "black>=23.0,<24",
   "pylint>=2.17,<3",
   "mypy>=1.0,<2",
+  "pyinstaller>=6.0,<7",
 ]
 
 [project.urls]

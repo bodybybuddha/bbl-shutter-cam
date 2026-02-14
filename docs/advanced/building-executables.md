@@ -1,0 +1,129 @@
+# Building Standalone Executables
+
+This guide covers building `bbl-shutter-cam` into standalone executables for Windows, macOS, and Linux.
+
+## What is PyInstaller?
+
+PyInstaller packages your Python application into a single executable that doesn't require Python to be installed on the user's system. Users can download and run the executable directly.
+
+## Prerequisites
+
+1. **Python 3.9+** installed
+2. **PyInstaller** (installed as part of dev dependencies)
+
+## Quick Start
+
+### macOS / Linux
+
+```bash
+# Install dev dependencies (includes PyInstaller)
+pip install -e ".[dev]"
+
+# Run the build script
+./scripts/build.sh
+
+# Find your executable at: dist/bbl-shutter-cam
+```
+
+### Windows
+
+```cmd
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# Run the build script
+scripts\build.bat
+
+# Find your executable at: dist\bbl-shutter-cam.exe
+```
+
+## Manual Build (All Platforms)
+
+If the scripts don't work for your setup:
+
+```bash
+# Install dependencies
+pip install -e ".[dev]"
+
+# Build the executable
+pyinstaller bbl-shutter-cam.spec
+
+# Executable will be in dist/ folder
+```
+
+## After Building
+
+### macOS / Linux
+
+```bash
+# Make it executable (usually already is)
+chmod +x dist/bbl-shutter-cam
+
+# Test it
+./dist/bbl-shutter-cam --help
+
+# Install to system (optional)
+sudo cp dist/bbl-shutter-cam /usr/local/bin/bbl-shutter-cam
+```
+
+### Windows
+
+```cmd
+# Test it
+dist\bbl-shutter-cam.exe --help
+
+# Install to PATH (optional)
+# Copy dist\bbl-shutter-cam.exe to a folder in your PATH
+```
+
+## Distribution
+
+For sharing with others:
+
+1. **Build the executable** using the steps above
+2. **Test it thoroughly** - make sure configs are portable
+3. **Compress for distribution**:
+   - **macOS/Linux**: `tar -czf bbl-shutter-cam-linux-x64.tar.gz dist/bbl-shutter-cam`
+   - **Windows**: `zip -r bbl-shutter-cam-windows.zip dist/bbl-shutter-cam.exe`
+
+## Cross-Platform Building (CI/CD)
+
+For automated builds on multiple platforms, see `.github/workflows/` for GitHub Actions setup (coming soon).
+
+## Troubleshooting
+
+### "PyInstaller not found"
+
+```bash
+pip install pyinstaller
+```
+
+### "Module not found" errors
+
+Add the module to `hiddenimports` in `bbl-shutter-cam.spec`:
+
+```python
+hiddenimports=['bleak', 'tomlkit', 'your_module_here'],
+```
+
+### File size is large
+
+This is normal - PyInstaller bundles Python + all dependencies. Try:
+
+```bash
+pyinstaller --onefile --strip bbl-shutter-cam.spec
+```
+
+### macOS "App can't be opened" error
+
+```bash
+chmod +x dist/bbl-shutter-cam
+codesign --deep --force --verify --verbose --sign - dist/bbl-shutter-cam
+```
+
+## Notes
+
+- **Config files** are stored in `~/.config/bbl-shutter-cam/` and will work across all platforms
+- **Executable is standalone** - no Python installation needed by end users
+- **Binary size**: Each executable is ~50-100MB (includes Python runtime)
+- **macOS executable**: This is a regular CLI executable, not a `.app` bundle

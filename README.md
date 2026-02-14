@@ -89,7 +89,9 @@ exit
 
 ---
 
-## Install bbl-shutter-cam (Developer Install)
+## Install bbl-shutter-cam (Two Options)
+
+### Option 1: From Source (Development)
 
 From the repository root:
 
@@ -105,6 +107,23 @@ Verify:
 ```bash
 bbl-shutter-cam --help
 ```
+
+### Option 2: Standalone Executable (Recommended for Users)
+
+Pre-built executables for Windows, macOS, and Linux are available in [Releases](https://github.com/bodybybuddha/bbl-shutter-cam/releases).
+
+Simply download the executable for your platform and run it—no Python installation needed!
+
+To build your own executable:
+
+```bash
+pip install -e ".[dev]"
+./scripts/build.sh      # macOS / Linux
+# or
+scripts\build.bat       # Windows
+```
+
+See [Building Executables](docs/advanced/building-executables.md) for details.
 
 ---
 

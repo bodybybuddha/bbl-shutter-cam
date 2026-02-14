@@ -414,6 +414,29 @@ def my_function(param1: str) -> bool:
 
 ---
 
+## Building Standalone Executables
+
+Want to distribute `bbl-shutter-cam` as a standalone application without requiring Python?
+
+See the [Building Executables Guide](building-executables.md) for detailed instructions on:
+- Creating executables for Windows, macOS, and Linux
+- Using PyInstaller for cross-platform builds
+- Distribution and sharing
+
+Quick start:
+
+```bash
+# macOS / Linux
+./scripts/build.sh
+
+# Windows
+scripts\build.bat
+```
+
+Your executable will be in the `dist/` folder.
+
+---
+
 ## Reporting Issues
 
 Use GitHub Issues to report bugs or suggest features:
