@@ -2,14 +2,23 @@
 
 Thank you for your interest in contributing to this project! This guide covers setting up your development environment and making contributions.
 
+**Before contributing, please review our [Code of Conduct](CODE_OF_CONDUCT.md).**
+
 ## Table of Contents
 
+- [Code of Conduct](#code-of-conduct)
 - [Developer Setup](#developer-setup)
 - [VSCode Workspace](#vscode-workspace)
 - [Running Tasks](#running-tasks)
 - [Code Style](#code-style)
 - [Testing](#testing)
 - [Submitting Changes](#submitting-changes)
+
+---
+
+## Code of Conduct
+
+This project is committed to providing a welcoming and inspiring community for all participants. Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) when interacting with others in the community.
 
 ---
 
@@ -143,11 +152,16 @@ python -m mypy src/bbl_shutter_cam/
 
 ## Code Style
 
-This project follows **PEP 8** style guidelines enforced by:
+This project follows **PEP 8** style guidelines enforced by tool configurations in `pyproject.toml`:
 
-- **Black** - Code formatter (88 character line length)
-- **Pylint** - Style and error checking
-- **mypy** - Static type checking
+- **Black** - Code formatter (100 character line length, Python 3.9-3.13)
+- **Pylint** - Style and error checking (customized for CLI applications)
+- **mypy** - Static type checking (Python 3.9 baseline)
+- **.editorconfig** - Cross-IDE formatting consistency (UTF-8, LF endings, proper indentation)
+
+### Tool Configuration
+
+All tools are configured in `pyproject.toml` under `[tool.black]`, `[tool.pylint]`, and `[tool.mypy]` sections. The `.editorconfig` file provides additional editor-agnostic settings for all file types.
 
 ### Before Committing
 
@@ -167,8 +181,9 @@ python -m mypy src/bbl_shutter_cam/
 When using VSCode:
 - Format on save is enabled (`Ctrl+S` auto-formats)
 - Import sorting is automatic
-- Rulers at 88 and 120 characters for reference
-- 4-space indentation
+- Rulers at 100 characters for reference
+- 4-space indentation for Python files
+- Settings defined in `.vscode/settings.json` and `.editorconfig`
 
 ---
 
@@ -232,21 +247,26 @@ bbl-shutter-cam/
 │   ├── config.py               # Config file handling
 │   ├── camera.py               # Camera capture wrapper
 │   ├── util.py                 # Utilities
-│   └── logging_config.py       # Logging setup
-├── tests/                      # Test suite
-├── docs/                       # User documentation
+│   ├── logging_config.py       # Logging setup
+│   └── py.typed                # Type hint marker
+├── tests/                      # Test suite (pytest)
+├── docs/                       # User documentation (Jekyll + GitHub Pages)
 ├── scripts/                    # Build scripts
+├── examples/                   # Example configuration
 ├── .vscode/                    # VSCode configuration
 │   ├── extensions.json         # Recommended extensions
 │   ├── tasks.json              # Build/test tasks
 │   └── settings.json           # (local, not committed)
-├── pyproject.toml              # Project metadata & dependencies
+├── .github/                    # GitHub workflows (CI/CD)
+├── .editorconfig               # Cross-IDE formatting rules
+├── pyproject.toml              # Project metadata, dependencies, tool configs
 ├── bbl-shutter-cam.spec        # PyInstaller configuration
+├── CHANGELOG.md                # Release history
+├── CODE_OF_CONDUCT.md          # Community guidelines
 ├── CONTRIBUTING.md             # This file
 ├── README.md                   # User guide
 ├── LICENSE                     # MIT License
 └── .gitignore
-
 ```
 
 ---
