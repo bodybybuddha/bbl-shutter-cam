@@ -15,6 +15,7 @@ Use a **Bambu Lab CyberBrick / BBL_SHUTTER Bluetooth shutter** to trigger photos
 - 🎥 **BLE Listening** - Pairs with BBL_SHUTTER and listens for shutter signals
 - 📸 **Auto Capture** - Triggers `rpicam-still` on each press (configurable)
 - 🔧 **Multi-Printer** - Manage multiple printers/cameras with profiles
+- 🎛️ **Interactive Tuning** - Dial in camera settings interactively
 - 🔋 **Headless** - Runs without GUI; optional systemd auto-start
 - 📝 **Config-Driven** - TOML profiles for easy setup and tweaking
 - 🎯 **Smart Debounce** - Prevents accidental double-triggers
@@ -70,6 +71,9 @@ sudo bluetoothctl
 ```bash
 # Setup first time (learns shutter signal)
 bbl-shutter-cam setup --profile my-printer
+
+# Tune camera settings interactively (optional)
+bbl-shutter-cam tune --profile my-printer
 
 # Test (no photos taken)
 bbl-shutter-cam run --profile my-printer --dry-run --verbose

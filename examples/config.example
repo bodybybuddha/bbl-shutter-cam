@@ -55,20 +55,32 @@ nopreview = true
 # vflip = false
 
 # ----------------------------
+# Focus (Camera Module 3)
+# ----------------------------
+# autofocus_mode = "auto"    # auto, manual, continuous
+# lens_position = 2.0         # 0.0 (infinity) to ~32.0 (close); for manual AF
+
+# ----------------------------
 # Auto exposure / color tuning
 # ----------------------------
 
 # Auto white balance mode
-# awb = "auto"        # auto, daylight, tungsten, fluorescent, indoor
+# awb = "auto"        # auto, daylight, tungsten, fluorescent, indoor, cloudy
 
 # Exposure compensation
 # ev = 0              # integer; negative = darker, positive = brighter
 
-# Noise reduction
-# denoise = "cdn_off"  # cdn_off, cdn_fast, cdn_hq
+# Color & Tone adjustments
+# saturation = 1.0    # 0.0-2.0; color intensity
+# contrast = 1.0      # 0.0-2.0
+# brightness = 0.0    # -1.0 to 1.0
+# sharpness = 1.0     # 0.0-2.0
 
-# Sharpening
-# sharpness = 1.0
+# Noise reduction
+# denoise = "cdn_off"  # off, cdn_off, cdn_fast, cdn_hq
+
+# Metering mode
+# metering = "centre"  # centre, spot, matrix, custom
 
 # ----------------------------
 # Manual exposure "lock" (optional)
@@ -77,8 +89,14 @@ nopreview = true
 # helps eliminate flicker in enclosure lighting.
 
 # shutter = 20000      # microseconds (e.g. 20000 = 1/50s)
-# gain = 2.0
-# awbgains = "1.5,1.8"
+# gain = 2.0           # analog gain
+# awbgains = "1.5,1.8" # manual white balance gains (r,b)
+
+# ----------------------------
+# Capture settings
+# ----------------------------
+# quality = 93         # JPEG quality (0-100)
+# timeout = 5000       # capture timeout in milliseconds
 ```
 
 # --------------------------------------------------
