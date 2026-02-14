@@ -103,6 +103,14 @@ output/
 captures/
 photos/
 
+# Jekyll (GitHub Pages)
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+Gemfile.lock
+vendor/
+
 # OS files
 Thumbs.db
 .DS_Store
