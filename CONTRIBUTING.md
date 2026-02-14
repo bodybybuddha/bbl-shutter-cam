@@ -1,0 +1,342 @@
+# Contributing to bbl-shutter-cam
+
+Thank you for your interest in contributing to this project! This guide covers setting up your development environment and making contributions.
+
+## Table of Contents
+
+- [Developer Setup](#developer-setup)
+- [VSCode Workspace](#vscode-workspace)
+- [Running Tasks](#running-tasks)
+- [Code Style](#code-style)
+- [Testing](#testing)
+- [Submitting Changes](#submitting-changes)
+
+---
+
+## Developer Setup
+
+### Prerequisites
+
+- Python 3.9+
+- Git
+- A terminal/command prompt
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/bodybybuddha/bbl-shutter-cam.git
+cd bbl-shutter-cam
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+# macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Windows
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+### 3. Install Development Dependencies
+
+```bash
+pip install -U pip
+pip install -e ".[dev]"
+```
+
+This installs:
+- The package in editable mode (changes take effect immediately)
+- All dev tools: pytest, black, pylint, mypy, pyinstaller
+
+### 4. Verify Setup
+
+```bash
+bbl-shutter-cam --help
+```
+
+---
+
+## VSCode Workspace
+
+This project includes a pre-configured VSCode workspace. If you're using VSCode, you'll get:
+
+- **Recommended extensions** - Auto-prompt to install Python, Pylance, Ruff, GitLens, etc.
+- **Pre-configured tasks** - Build, test, lint, and format from the editor
+- **Workspace settings** - Python formatter/linter paths, editor rules, exclusions
+
+### Recommended VSCode Extensions
+
+The project will suggest these extensions when opened:
+
+- **Python** (`ms-python.python`) - Core Python support
+- **Pylance** (`ms-python.vscode-pylance`) - Type checking and intellisense
+- **Ruff** (`charliermarsh.ruff`) - Fast Python linter
+- **GitLens** (`eamodio.gitlens`) - Git integration
+- **Docker** (`ms-azuretools.vscode-docker`) - For container debugging (optional)
+
+---
+
+## Running Tasks
+
+VSCode tasks are available via keyboard shortcuts or the Command Palette (`Ctrl+Shift+P`):
+
+### Build Tasks
+
+**Ctrl+Shift+B** (or search "Run Build Task"):
+
+| Task | Purpose |
+|------|---------|
+| **Build executable** ⭐ (default) | Create standalone binary for your platform |
+| Build executable (debug) | Build with debug symbols for troubleshooting |
+
+### Test Tasks
+
+**Ctrl+Shift+T** (or search "Run Test Task"):
+
+| Task | Purpose |
+|------|---------|
+| **Run tests** ⭐ (default) | Execute pytest suite with verbose output |
+| Run tests with coverage | Generate HTML coverage report in `htmlcov/` |
+
+### Code Quality Tasks
+
+Search "Run Task" (`Ctrl+Shift+P` → "Tasks: Run Task"):
+
+| Task | Purpose |
+|------|---------|
+| Install dependencies | Set up dev environment |
+| Lint with pylint | Check code style violations |
+| Format code with black | Auto-format code to PEP 8 |
+| Type check with mypy | Check type annotations |
+| Clean build artifacts | Remove `build/`, `dist/`, cache files |
+| Dev environment setup | Runs install → format → lint (in sequence) |
+
+### Running Tasks from Terminal
+
+If you prefer the command line:
+
+```bash
+# Build
+python -m PyInstaller bbl-shutter-cam.spec
+# or use the build script:
+./scripts/build.sh      # macOS/Linux
+scripts\build.bat       # Windows
+
+# Test
+python -m pytest tests/ -v
+python -m pytest tests/ -v --cov=src/bbl_shutter_cam --cov-report=html
+
+# Lint
+python -m pylint src/bbl_shutter_cam/
+
+# Format
+python -m black src/ tests/ scripts/
+
+# Type check
+python -m mypy src/bbl_shutter_cam/
+```
+
+---
+
+## Code Style
+
+This project follows **PEP 8** style guidelines enforced by:
+
+- **Black** - Code formatter (88 character line length)
+- **Pylint** - Style and error checking
+- **mypy** - Static type checking
+
+### Before Committing
+
+Run the "Dev environment setup" task (or manually):
+
+```bash
+# Format code
+python -m black src/ tests/ scripts/
+
+# Check for issues
+python -m pylint src/bbl_shutter_cam/
+python -m mypy src/bbl_shutter_cam/
+```
+
+### Editor Settings
+
+When using VSCode:
+- Format on save is enabled (`Ctrl+S` auto-formats)
+- Import sorting is automatic
+- Rulers at 88 and 120 characters for reference
+- 4-space indentation
+
+---
+
+## Testing
+
+Tests are located in the `tests/` directory and use **pytest**.
+
+### Run All Tests
+
+```bash
+python -m pytest tests/ -v
+```
+
+### Run Specific Test
+
+```bash
+python -m pytest tests/test_config.py -v
+pytest tests/test_config.py::test_load_profile -v
+```
+
+### Coverage Report
+
+Generate HTML coverage report:
+
+```bash
+python -m pytest tests/ -v --cov=src/bbl_shutter_cam --cov-report=html
+```
+
+View report: Open `htmlcov/index.html` in your browser.
+
+### Writing Tests
+
+- Test files go in `tests/` with `test_*.py` naming
+- Use descriptive test names: `test_load_profile_missing_file_raises_error()`
+- Test structure: Arrange → Act → Assert
+
+Example:
+
+```python
+def test_load_profile_missing_file_raises_error():
+    """Test that loading a missing profile raises FileNotFoundError."""
+    # Arrange
+    missing_path = Path("/tmp/nonexistent.toml")
+    
+    # Act & Assert
+    with pytest.raises(FileNotFoundError):
+        load_config(missing_path)
+```
+
+---
+
+## Project Structure
+
+```
+bbl-shutter-cam/
+├── src/bbl_shutter_cam/        # Main package
+│   ├── __init__.py
+│   ├── cli.py                  # Command-line interface
+│   ├── discover.py             # BLE discovery & orchestration
+│   ├── ble.py                  # Bluetooth utilities
+│   ├── config.py               # Config file handling
+│   ├── camera.py               # Camera capture wrapper
+│   ├── util.py                 # Utilities
+│   └── logging_config.py       # Logging setup
+├── tests/                      # Test suite
+├── docs/                       # User documentation
+├── scripts/                    # Build scripts
+├── .vscode/                    # VSCode configuration
+│   ├── extensions.json         # Recommended extensions
+│   ├── tasks.json              # Build/test tasks
+│   └── settings.json           # (local, not committed)
+├── pyproject.toml              # Project metadata & dependencies
+├── bbl-shutter-cam.spec        # PyInstaller configuration
+├── CONTRIBUTING.md             # This file
+├── README.md                   # User guide
+├── LICENSE                     # MIT License
+└── .gitignore
+
+```
+
+---
+
+## Submitting Changes
+
+### 1. Create a Branch
+
+```bash
+git checkout -b feature/my-feature
+```
+
+### 2. Make Changes
+
+Write code, add tests, update docs. Commit frequently with clear messages:
+
+```bash
+git add .
+git commit -m "Add feature: description of change"
+```
+
+### 3. Test Locally
+
+Run the full test suite and linting:
+
+```bash
+python -m pytest tests/ -v
+python -m pylint src/bbl_shutter_cam/
+python -m mypy src/bbl_shutter_cam/
+python -m black src/ tests/ --check  # Verify formatting
+```
+
+Or run the "Dev environment setup" task in VSCode.
+
+### 4. Push and Create Pull Request
+
+```bash
+git push origin feature/my-feature
+```
+
+Then open a Pull Request on GitHub. Include:
+- Description of what changed and why
+- Relevant issue numbers (e.g., "Closes #42")
+- Screenshots if UI-related
+- Test results
+
+### 5. Code Review
+
+Maintainers will review your changes. Be responsive to feedback!
+
+---
+
+## Common Development Tasks
+
+### Add a New CLI Command
+
+1. Add subcommand to `_build_parser()` in `cli.py`
+2. Implement `_cmd_yourcommand()` handler
+3. Add logic to appropriate module (discover.py, config.py, etc.)
+4. Add tests in `tests/test_cli.py`
+5. Update [docs/advanced/extending.md](docs/advanced/extending.md)
+
+### Add Configuration Options
+
+1. Update example config: `examples/config.example.toml`
+2. Update schema handling in `config.py`
+3. Update documentation in `docs/user-guide/profiles.md`
+4. Add tests for new config keys
+
+### Build Standalone Executable
+
+See [Building Executables Guide](docs/advanced/building-executables.md):
+
+```bash
+./scripts/build.sh      # macOS/Linux
+scripts\build.bat       # Windows
+```
+
+---
+
+## Getting Help
+
+- **Questions?** Check [FAQ](docs/faq.md) or [Troubleshooting](docs/troubleshooting.md)
+- **Implementation details?** See [docs/advanced/extending.md](docs/advanced/extending.md)
+- **Report bugs?** Open a [GitHub Issue](https://github.com/bodybybuddha/bbl-shutter-cam/issues)
+
+---
+
+## Questions?
+
+Feel free to open a GitHub Discussion or Issue. We're here to help!
+
+Thank you for contributing! 🎉

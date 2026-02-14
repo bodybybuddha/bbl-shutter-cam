@@ -231,6 +231,25 @@ Log directories are created automatically.
 
 ---
 
+## Contributing
+
+Interested in contributing? See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
+- Setting up your development environment
+- Running tests and building executables
+- VSCode workspace configuration
+- Code style guidelines
+- Submitting pull requests
+
+Quick start:
+
+```bash
+pip install -e ".[dev]"
+python -m pytest tests/ -v
+```
+
+---
+
 ## License
 
 MIT

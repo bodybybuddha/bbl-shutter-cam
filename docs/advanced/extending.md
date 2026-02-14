@@ -11,11 +11,15 @@ Extend and improve `bbl-shutter-cam`.
 
 ## Overview
 
-This project is open-source and welcomes contributions. This guide covers:
+This project is open-source and welcomes contributions. For comprehensive developer setup instructions, see [**CONTRIBUTING.md**](../../CONTRIBUTING.md) at the project root.
+
+This guide covers:
 - Local development setup
 - Code structure and patterns
 - Adding features
 - Submitting changes
+
+For VSCode setup, tasks, and testing workflows, see [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ---
 
