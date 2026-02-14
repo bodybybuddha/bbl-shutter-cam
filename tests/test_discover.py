@@ -2,6 +2,7 @@
 import asyncio
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 import pytest
 from tomlkit import document, dumps
@@ -12,7 +13,7 @@ from bbl_shutter_cam.config import load_config
 
 @dataclass
 class FakeDevice:
-    name: str | None
+    name: Optional[str]
     address: str
 
 
