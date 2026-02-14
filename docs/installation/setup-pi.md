@@ -268,7 +268,7 @@ Want `bbl-shutter-cam` to launch automatically on boot?
 
 → See [Auto-Start with Systemd](../advanced/systemd-service.md)
 
-### Tune Camera Settings (Upcoming v0.2.0)
+### Tune Camera Settings (Optional)
 
 Adjust rotation, focus, exposure, white balance:
 
@@ -276,7 +276,7 @@ Adjust rotation, focus, exposure, white balance:
 bbl-shutter-cam tune --profile my-printer
 ```
 
-*(Guide available when feature releases)*
+See [Camera Settings & Tuning](../user-guide/camera-settings.md) for details.
 
 ---
 

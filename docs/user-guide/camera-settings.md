@@ -46,9 +46,9 @@ quality = 93            # JPEG quality (0-100)
 
 ---
 
-## Interactive Tuning (v0.3.0)
+## Interactive Tuning
 
-**New in v0.3.0:** Use the interactive tuning menu to dial in your settings!
+Use the interactive tuning menu to dial in your settings!
 
 ```bash
 bbl-shutter-cam tune --profile my-printer
@@ -111,4 +111,4 @@ saturation = 0.9       # Slightly muted
 
 - [Signal Discovery](../features/signal-discovery.md)
 - [Troubleshooting](../troubleshooting.md)
-- **Camera calibration (v0.2.0)**: Interactive tuning mode coming soon!
+- **Camera calibration**: Use `bbl-shutter-cam tune` for interactive tuning

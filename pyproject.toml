@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bbl-shutter-cam"
-version = "0.2.0"
+version = "1.0.0"
 description = "Use a Bambu Cyberbrick BBL_SHUTTER BLE trigger to capture photos on Raspberry Pi (rpicam-still)."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -12,7 +12,7 @@ license = { text = "MIT" }
 authors = [{ name = "Casa Taylor" }]
 keywords = ["raspberry-pi", "bluetooth", "ble", "timelapse", "bambu", "rpicam"]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",

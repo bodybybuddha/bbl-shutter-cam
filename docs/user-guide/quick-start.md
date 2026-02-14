@@ -23,7 +23,22 @@ Get `bbl-shutter-cam` running in **5 minutes**.
 
 ## Step 1: Install
 
-SSH into your Pi and run:
+SSH into your Pi and choose one of the install methods below.
+
+### Option A: Standalone binary (recommended)
+
+1. Download the latest release from GitHub.
+2. Choose the correct Pi architecture:
+    - `bbl-shutter-cam-<version>-linux-arm64` (64-bit)
+    - `bbl-shutter-cam-<version>-linux-armv7` (32-bit)
+3. Make it executable:
+
+```bash
+chmod +x bbl-shutter-cam-<version>-linux-arm64
+./bbl-shutter-cam-<version>-linux-arm64 --help
+```
+
+### Option B: From source
 
 ```bash
 cd ~

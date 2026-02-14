@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-02-14
+
+### Added
+- GitHub Actions CI for linting and tests (Python 3.9-3.13)
+- Coverage gate at 80% with expanded unit test suite
+- Release workflow that builds Raspberry Pi binaries (arm64 + armv7)
+- Additional tests for BLE, CLI, discover, tune, and logging modules
+
+### Changed
+- CLI handlers now initialize config paths consistently and run BLE scan
+- `expand_path()` now expands environment variables and resolves absolute paths
+- Documentation refreshed for v1.0.0 release and Pi binaries
+
 ## [0.3.1] - 2026-02-14
 
 ### Fixed
@@ -60,5 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Repository setup
 
 [0.3.0]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v0.2.0...v0.3.0
+[0.3.1]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v0.3.0...v0.3.1
+[1.0.0]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v0.3.1...v1.0.0
 [0.2.0]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bodybybuddha/bbl-shutter-cam/releases/tag/v0.1.0

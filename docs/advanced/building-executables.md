@@ -86,9 +86,13 @@ For sharing with others:
    - **macOS/Linux**: `tar -czf bbl-shutter-cam-linux-x64.tar.gz dist/bbl-shutter-cam`
    - **Windows**: `zip -r bbl-shutter-cam-windows.zip dist/bbl-shutter-cam.exe`
 
+If you only need Raspberry Pi binaries, use the GitHub Releases page. Each release automatically builds and attaches:
+- `bbl-shutter-cam-<version>-linux-arm64`
+- `bbl-shutter-cam-<version>-linux-armv7`
+
 ## Cross-Platform Building (CI/CD)
 
-For automated builds on multiple platforms, see `.github/workflows/` for GitHub Actions setup (coming soon).
+Automated builds run on GitHub Actions for Raspberry Pi targets. When a GitHub Release is published, the workflow builds and uploads arm64 and armv7 binaries to the release.
 
 ## Troubleshooting
 
