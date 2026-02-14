@@ -59,7 +59,7 @@ sudo systemctl start bluetooth
 
 Some tips on the use of **bluetoothctl** can be found here: [raspberry-pi-bluetooth-setup](https://raspberrytips.com/raspberry-pi-bluetooth-setup/)
 
-The below is just some notes on how to get it to work.  Need to update it a bit more with some details.  For instance, need to make sure bluetooth isn't blocked.  In addition, once a the time-lapse kit is paired, need to trust the device.  
+The below is just some notes on how to get it to work.  Need to update it a bit more with some details.  For instance, need to make sure bluetooth isn't blocked.  In addition, once a the time-lapse kit is paired, need to trust the device.
 
 Put the CyberBrick Time‑Lapse Kit into pairing mode, then:
 

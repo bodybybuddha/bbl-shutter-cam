@@ -212,7 +212,7 @@ def test_load_profile_missing_file_raises_error():
     """Test that loading a missing profile raises FileNotFoundError."""
     # Arrange
     missing_path = Path("/tmp/nonexistent.toml")
-    
+
     # Act & Assert
     with pytest.raises(FileNotFoundError):
         load_config(missing_path)

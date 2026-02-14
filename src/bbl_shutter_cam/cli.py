@@ -1,4 +1,13 @@
-# src/bbl_shutter_cam/cli.py
+"""Command-line interface for bbl-shutter-cam.
+
+Provides argument parsing and command handlers for:
+    - scan: Find nearby BLE devices
+    - setup: Configure a new printer profile
+    - debug: Discover and log unknown BLE signals
+    - run: Listen for shutter signals and capture photos
+
+All commands use async/await for non-blocking BLE operations.
+"""
 from __future__ import annotations
 
 import argparse
@@ -12,6 +21,11 @@ from .util import LOG, configure_logging
 
 
 def _build_parser() -> argparse.ArgumentParser:
+    """Build and return the argument parser for all CLI commands.
+    
+    Returns:
+        argparse.ArgumentParser: Configured parser with all subcommands.
+    """
     p = argparse.ArgumentParser(
         prog="bbl-shutter-cam",
         description="Use a BBL_SHUTTER BLE trigger to capture photos with rpicam-still.",
@@ -78,7 +92,19 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _cmd_scan(args: argparse.Namespace) -> int:
-    devices = asyncio.run(discover.scan(name_filter=args.name, timeout=args.timeout))
+    """Scan for nearby BLE devices.
+    
+    Performs a BLE scan and prints discovered devices. Optionally filters
+    results by device name.
+    
+    Args:
+        args: Parsed command-line arguments containing:
+            - name: Optional device name filter
+            - timeout: Scan duration in seconds
+    
+    Returns:
+        0 on success, 1 if no devices found.
+    """
     if not devices:
         LOG.warning("No BLE devices found (or none matching).")
         return 1
@@ -91,8 +117,26 @@ def _cmd_scan(args: argparse.Namespace) -> int:
 
 
 def _cmd_setup(args: argparse.Namespace) -> int:
-    cfg_path: Path = args.config
-    ensure_config_exists(cfg_path)
+    """Set up a new printer profile with device pairing and signal learning.
+    
+    Interactive setup that:
+    1. Scans for the BLE device (or uses provided MAC)
+    2. Learns the notify UUID by waiting for a button press
+    3. Saves configuration to config.toml
+    
+    Args:
+        args: Parsed command-line arguments containing:
+            - config: Path to config.toml
+            - profile: Profile name to create/update
+            - name: Device name to scan for (default: BBL_SHUTTER)
+            - mac: Optional MAC address to skip scanning
+            - timeout: Scan timeout in seconds
+            - press_timeout: Time to wait for button press in seconds
+            - verbose: Whether to print BLE payloads during learning
+    
+    Returns:
+        0 on success, 1 on failure.
+    """
 
     result = asyncio.run(
         discover.setup_profile(
@@ -122,8 +166,23 @@ def _cmd_setup(args: argparse.Namespace) -> int:
 
 
 def _cmd_debug(args: argparse.Namespace) -> int:
-    cfg_path: Path = args.config
-    ensure_config_exists(cfg_path)
+    """Discover and log unknown BLE signals from a device.
+    
+    Connects to a device and listens for all BLE notifications, logging
+    their hex values. Useful for discovering new trigger signals or
+    debugging connection issues.
+    
+    Args:
+        args: Parsed command-line arguments containing:
+            - config: Path to config.toml
+            - profile: Profile name to use
+            - mac: Optional MAC address (overrides profile config)
+            - duration: Listen duration in seconds (0 = infinite)
+            - update_config: Whether to auto-save discovered signals
+    
+    Returns:
+        0 on success, 1 on failure.
+    """
 
     prof = load_profile(cfg_path, args.profile)
     mac = args.mac or prof.get("device", {}).get("mac")
@@ -145,8 +204,25 @@ def _cmd_debug(args: argparse.Namespace) -> int:
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
-    cfg_path: Path = args.config
-    ensure_config_exists(cfg_path)
+    """Listen for shutter signals and capture photos.
+    
+    Main operation mode. Connects to a configured BLE device and listens
+    for trigger signals. On each trigger, captures a photo using rpicam-still
+    with settings from the profile configuration.
+    
+    Auto-reconnects on connection loss. Use Ctrl+C to stop.
+    
+    Args:
+        args: Parsed command-line arguments containing:
+            - config: Path to config.toml
+            - profile: Profile name to use (or default_profile from config)
+            - dry_run: If True, logs triggers but doesn't capture photos
+            - verbose: Whether to print BLE notification payloads
+            - reconnect_delay: Seconds between reconnection attempts
+    
+    Returns:
+        0 on normal exit, 1 on error (typically not reached due to Ctrl+C).
+    """
 
     prof = load_profile(cfg_path, args.profile)
     asyncio.run(
@@ -161,8 +237,17 @@ def _cmd_run(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = _build_parser()
-    args = parser.parse_args(argv)
+    """Entry point for the CLI application.
+    
+    Parses arguments, initializes logging, and dispatches to the appropriate
+    command handler (scan, setup, debug, or run).
+    
+    Args:
+        argv: List of command-line arguments (defaults to sys.argv[1:])
+    
+    Raises:
+        SystemExit: With exit code 0 on success, 1 on error, 2 on bad arguments.
+    """
 
     # Initialize logging early
     configure_logging(

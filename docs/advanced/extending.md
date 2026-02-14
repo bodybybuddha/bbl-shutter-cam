@@ -400,13 +400,13 @@ When adding features:
 ```python
 def my_function(param1: str) -> bool:
     """Short description.
-    
+
     Longer description explaining the function's behavior,
     parameters, and return value.
-    
+
     Args:
         param1: Description of param1
-        
+
     Returns:
         Description of return value
     """
