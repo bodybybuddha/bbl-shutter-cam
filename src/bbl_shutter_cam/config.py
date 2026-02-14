@@ -91,6 +91,48 @@ def load_profile(path: Path, profile_name: str | None) -> Dict[str, Any]:
     return prof
 
 
+def get_trigger_events(profile: Dict[str, Any]) -> list[Dict[str, Any]]:
+    """
+    Get trigger events from a profile.
+    Supports both new event-based config and legacy hardcoded format.
+    
+    Returns list of event dicts with keys: uuid, hex, capture, name (optional)
+    """
+    device = profile.get("device", {}) or {}
+    events = device.get("events", [])
+
+    # If no events configured, return hardware defaults for compatibility
+    if not events:
+        # Default trigger signals for BBL_SHUTTER / Bambu devices
+        return [
+            {"uuid": "00002a4d-0000-1000-8000-00805f9b34fb", "hex": "4000", "capture": True, "name": "manual_button"},
+            {"uuid": "00002a4d-0000-1000-8000-00805f9b34fb", "hex": "8000", "capture": True, "name": "bambu_studio"},
+            {"uuid": "00002a4d-0000-1000-8000-00805f9b34fb", "hex": "0000", "capture": False, "name": "release"},
+        ]
+
+    return events
+
+
+def get_event_trigger_bytes(profile: Dict[str, Any]) -> list[bytes]:
+    """
+    Get all trigger byte sequences that should capture photos.
+    Useful for compatibility with existing code.
+    """
+    events = get_trigger_events(profile)
+    triggers = []
+    for event in events:
+        if event.get("capture", False):
+            try:
+                hex_str = event.get("hex", "")
+                # Convert hex string like "4000" to bytes
+                trigger_bytes = bytes.fromhex(hex_str)
+                triggers.append(trigger_bytes)
+            except ValueError:
+                continue
+    return triggers
+
+
+
 def update_profile_device_fields(
     path: Path,
     profile_name: str,

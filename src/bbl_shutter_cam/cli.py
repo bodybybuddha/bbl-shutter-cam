@@ -58,6 +58,14 @@ def _build_parser() -> argparse.ArgumentParser:
     setup.add_argument("--verbose", action="store_true", help="Print BLE notify payloads while learning")
     setup.set_defaults(func=_cmd_setup)
 
+    # debug
+    debug = sub.add_parser("debug", help="Capture all BLE signals to discover unknown triggers and update config")
+    debug.add_argument("--profile", required=True, help="Profile name (e.g. p1s-office)")
+    debug.add_argument("--mac", default=None, help="Override: use this MAC instead of pulling from profile")
+    debug.add_argument("--duration", type=float, default=120.0, help="Listen duration seconds (0 = infinite)")
+    debug.add_argument("--update-config", action="store_true", help="Automatically update config with discovered signals")
+    debug.set_defaults(func=_cmd_debug)
+
     # run
     run = sub.add_parser("run", help="Run listener for a profile")
     run.add_argument("--profile", default=None, help="Profile name (default: config default_profile)")
@@ -110,6 +118,29 @@ def _cmd_setup(args: argparse.Namespace) -> int:
     print(f"    bbl-shutter-cam run --profile {args.profile} --dry-run --verbose")
     LOG.info("Then: run for real")
     print(f"    bbl-shutter-cam run --profile {args.profile}")
+    return 0
+
+
+def _cmd_debug(args: argparse.Namespace) -> int:
+    cfg_path: Path = args.config
+    ensure_config_exists(cfg_path)
+
+    prof = load_profile(cfg_path, args.profile)
+    mac = args.mac or prof.get("device", {}).get("mac")
+    
+    if not mac:
+        LOG.error(f"Profile '{args.profile}' has no MAC. Run setup first or provide --mac.")
+        return 1
+
+    asyncio.run(
+        discover.debug_signals(
+            config_path=cfg_path,
+            profile_name=args.profile,
+            mac=mac,
+            duration=args.duration,
+            update_config=args.update_config,
+        )
+    )
     return 0
 
 
