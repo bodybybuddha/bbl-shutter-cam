@@ -7,6 +7,16 @@ This document tracks development releases and features for the bbl-shutter-cam p
 
 # Released Versions
 
+## v0.3.1 - Bug Fix Release ✅ Released 2026-02-14
+
+**Milestone:** Fixed default output directory collision between profiles.
+
+### Fixed
+- Default output_dir now includes profile name to prevent file collision
+- Profiles without explicit `output_dir` setting now default to `~/captures/{profile_name}/`
+
+---
+
 ## v0.3.0 - Interactive Camera Tuning ✅ Released 2026-02-14
 
 **Milestone:** Added interactive camera calibration for optimal image quality.

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-14
+
+### Fixed
+- Default output_dir now includes profile name to prevent file collision between profiles
+- Profiles without explicit output_dir will use `~/captures/{profile_name}/` instead of `~/captures/`
+
 ## [0.3.0] - 2026-02-14
 
 ### Added

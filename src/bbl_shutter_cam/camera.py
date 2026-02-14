@@ -107,7 +107,10 @@ def camera_config_from_profile(profile: Dict[str, Any]) -> CameraConfig:
     cam = profile.get("camera", {}) or {}
     rp = cam.get("rpicam", {}) or {}
 
-    output_dir = cam.get("output_dir", str(Path.home() / "captures"))
+    # Default output_dir includes profile name to prevent file collision
+    profile_name = profile.get("_profile_name", "default")
+    default_output = str(Path.home() / "captures" / profile_name)
+    output_dir = cam.get("output_dir", default_output)
     filename_format = cam.get("filename_format", "%Y%m%d_%H%M%S.jpg")
     min_interval_sec = float(cam.get("min_interval_sec", 0.5))
 
