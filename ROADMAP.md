@@ -194,27 +194,7 @@ capture = false
 
 # Planned Future Development
 
-## Stage 2: Hardware Detection & Multi-Machine Support 📋 Planned (v0.3.0+)
-
-### Objectives
-- Implement automatic hardware detection (Pi model, camera type)
-- Create setup wizard for first-run configuration
-- Support multi-camera and multi-printer profiles
-
-### Planned Tasks
-- [ ] Detect Raspberry Pi hardware (model, OS version)
-- [ ] Detect camera type (rpicam, picamera, etc.)
-- [ ] Build interactive setup wizard
-- [ ] Validate config against detected hardware
-- [ ] Create hardware-specific presets
-- [ ] Document multi-machine deployment patterns
-
-### Dependencies
-- Stage 1 complete ✅
-
----
-
-## Stage 3: Testing & CI/CD 📋 Planned (v0.3.0+)
+## Stage 3: Testing & CI/CD 📋 Planned (v1.0.0)
 
 ### Objectives
 - Establish test infrastructure
@@ -236,46 +216,49 @@ capture = false
 
 ---
 
-## Stage 4: Systemd & Deployment 📋 Planned (v0.3.0+)
-
-### Objectives
-- Enable reliable headless operation on Raspberry Pi
-- Create deployment templates and documentation
-
-### Planned Tasks
-- [ ] Create `bbl-shutter-cam.service` systemd template
-- [ ] Add systemd timer for scheduled restarts
-- [ ] Document service installation
-- [ ] Create systemd user service alternative
-- [ ] Add log rotation configuration
-
-### Dependencies
-- Requires logging config (Stage 1 ✅)
-- Requires hardware detection (Stage 2)
-
----
-
-## Stage 5: Advanced Documentation & Polish 📋 Planned (v1.0.0)
+## Stage 5: Documentation & Polish 📋 Planned (v1.0.0)
 
 ### Objectives
 - Comprehensive user and developer documentation
-- Future extensibility guide
+- Production-ready documentation and examples
 
 ### Planned Tasks
-- [ ] Write `docs/SETUP.md` (hardware prerequisites, installation)
-- [ ] Write `docs/CONFIGURATION.md` (profile management, camera settings)
-- [ ] Write `docs/TROUBLESHOOTING.md` (common issues, debug modes)
-- [ ] Create `CONTRIBUTING.md` (dev workflow, testing)
-- [ ] Create `CHANGELOG.md` (version history)
+- [ ] Enhance `docs/user-guide/` with comprehensive tutorials
+- [ ] Expand `docs/troubleshooting.md` with common issues and solutions
+- [ ] Update `CONTRIBUTING.md` with complete dev workflow
 - [ ] Add hardware-specific guides (Pi Zero 2 W, Pi 4, Pi 5)
 - [ ] Create example profiles for common setups
+- [ ] Polish existing documentation for clarity and completeness
+- [ ] Add FAQ section with real-world usage scenarios
 
 ### Dependencies
 - All prior stages
 
 ---
 
-## Stage 6: Extended Features 📋 Planned (v1.0.0+)
+# Post-v1.0.0 Features
+
+## Future: Hardware Detection & Multi-Machine Support 📋 Planned (Post-v1)
+
+### Objectives
+- Implement automatic hardware detection (Pi model, camera type)
+- Create setup wizard for first-run configuration
+- Support multi-camera and multi-printer profiles
+
+### Planned Tasks
+- [ ] Detect Raspberry Pi hardware (model, OS version)
+- [ ] Detect camera type (rpicam, picamera, etc.)
+- [ ] Build interactive setup wizard
+- [ ] Validate config against detected hardware
+- [ ] Create hardware-specific presets
+- [ ] Document multi-machine deployment patterns
+
+### Dependencies
+- v1.0.0 release complete
+
+---
+
+## Future: Extended Features 📋 Planned (Post-v1)
 
 ### Objectives
 - Enhance core functionality based on user feedback
@@ -303,7 +286,9 @@ capture = false
 - Supports colored terminal output for development
 - File logging with rotation for production/headless
 - Compatible with existing `util.py` LOG infrastructure
-- Can integrate with systemd journal in Stage 4
+
+### Systemd Service (Removed from Roadmap)
+While bbl-shutter-cam is designed for headless operation on Raspberry Pi, it does not run as a persistent daemon or background service. The tool operates on-demand when triggered by Bluetooth signals from the printer. A systemd service template was considered but removed from the roadmap as it doesn't align with the tool's event-driven architecture.
 
 ### Multi-Machine Deployment
 - User configs stored in `~/.config/bbl-shutter-cam/config.toml`
@@ -319,6 +304,7 @@ capture = false
 
 | Version | Date | Stages Completed | Status |
 |---------|------|------------------|--------|
+| v0.3.1 | 2026-02-14 | Bug Fix (output_dir default) | ✅ Released |
 | v0.3.0 | 2026-02-14 | Stage 2.6 (Camera Calibration) | ✅ Released |
 | v0.2.0 | 2026-02-14 | Stage 1, Stage 2.5 | ✅ Released |
 | v0.1.0 | Planning | Initial planning | ✅ Complete |
@@ -327,8 +313,11 @@ capture = false
 
 | Version | Target | Planned Stages | Complexity |
 |---------|--------|----------------|------------|
-| v0.4.0 | TBD | Stage 2 (Hardware Detection), Stage 3 (Testing/CI), Stage 4 (Systemd) | Medium |
-| v1.0.0 | TBD | Stage 5 (Documentation Polish), Stage 6 (Extended Features) | High |
+| v1.0.0 | TBD | Stage 3 (Testing/CI), Stage 5 (Documentation) | Medium |
+
+### Post-v1.0.0 Development
+
+Future enhancements (Hardware Detection, Extended Features) will be planned after v1.0.0 release based on user feedback and requirements.
 
 ---
 

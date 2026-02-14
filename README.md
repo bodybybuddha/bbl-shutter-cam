@@ -151,7 +151,7 @@ Captures all BLE signals while you trigger the shutter or Bambu Studio app and s
 - **Prevent Double Captures?** Adjust `min_interval_sec` in camera config (default: 0.5s)
 - **Varying Enclosure Lighting?** Lock exposure with manual `shutter` and `gain` settings
 - **Headless Setup?** Use `--log-file` for debugging on remote systems
-- **Auto-Start?** See [Systemd Service](https://bodybybuddha.github.io/bbl-shutter-cam/advanced/headless-operation/#systemd-auto-start)
+- **Auto-Start on Boot?** Optional [Systemd Service](https://bodybybuddha.github.io/bbl-shutter-cam/advanced/systemd-service/) helps ensure the tool is always listening
 
 ---
 
