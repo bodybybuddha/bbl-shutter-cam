@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import IntEnum
+import os
 from pathlib import Path
 from typing import Any, Iterable, Optional, TextIO
 
@@ -174,7 +175,9 @@ def expand_path(p: str | Path) -> Path:
         >>> expand_path("~/documents")
         PosixPath('/home/user/documents')
     """
-    return Path(p).expanduser()
+    expanded = os.path.expandvars(str(p))
+    path = Path(expanded).expanduser()
+    return path.resolve(strict=False)
 
 
 def ensure_dir(p: str | Path) -> Path:
