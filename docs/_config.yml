@@ -1,0 +1,65 @@
+theme: just-the-docs
+
+# Title of your site
+title: bbl-shutter-cam Documentation
+
+# Description of your site
+description: Headless Bluetooth time-lapse capture for Bambu Lab 3D printers on Raspberry Pi
+
+# The path of the repository
+baseurl: /bbl-shutter-cam
+
+# URL of your repository
+repo: https://github.com/bodybybuddha/bbl-shutter-cam
+
+# Enable or disable the search functionality
+search_enabled: true
+
+# Aux links for the upper right navigation
+aux_links:
+  "GitHub": https://github.com/bodybybuddha/bbl-shutter-cam
+  "PyPI": https://pypi.org/project/bbl-shutter-cam
+
+# Footer "Edit this page on GitHub" link text
+last_edit_time_format: "%b %e %Y at %l:%M %p %Z"
+
+# Footer "Edit this page on GitHub" link text
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_repository: "https://github.com/bodybybuddha/bbl-shutter-cam"
+gh_edit_branch: "dev"
+gh_edit_view_mode: "tree"
+
+# Color scheme for syntax highlighting
+color_scheme: nil
+
+# Heading anchor links appear on hover over h1-h6 tags in page content
+# allowing you to deep link to a particular heading on a page.
+heading_anchors: true
+
+# Kramdown options
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+  parse_block_html: true
+
+# Press Ctrl+F to activate search
+key_shortcuts: true
+
+# Disable the nav sidebar
+nav_enabled: true
+
+# Collections for organizing content
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:path/
+
+# Defaults for markdown files
+defaults:
+  - scope:
+      path: "docs"
+    values:
+      layout: "page"

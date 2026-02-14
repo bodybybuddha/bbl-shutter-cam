@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.debugpy",
+    "charliermarsh.ruff",
+    "ms-vscode.makefile-tools",
+    "ms-vscode.cpptools-extension-pack",
+    "eamodio.gitlens",
+    "ms-azuretools.vscode-docker"
+  ]
+}
