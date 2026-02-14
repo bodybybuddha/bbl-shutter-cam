@@ -13,13 +13,13 @@ Configuration file location:
 Configuration structure:
     [settings]
     default_profile = "office"
-    
+
     [profiles.office]
     [profiles.office.device]
     name = "BBL_SHUTTER"
     mac = "AA:BB:CC:DD:EE:FF"
     notify_uuid = "00002a4d-0000-1000-8000-00805f9b34fb"
-    
+
     [profiles.office.camera]
     output_dir = "~/captures/office"
     [profiles.office.camera.rpicam]
