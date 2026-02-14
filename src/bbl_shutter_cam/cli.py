@@ -273,6 +273,8 @@ def main(argv: list[str] | None = None) -> None:
     Raises:
         SystemExit: With exit code 0 on success, 1 on error, 2 on bad arguments.
     """
+    parser = _build_parser()
+    args = parser.parse_args(argv)
 
     # Initialize logging early
     configure_logging(
