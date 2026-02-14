@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux-arm:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            platform: linux/arm64
+            suffix: linux-arm64
+          - arch: armv7
+            platform: linux/arm/v7
+            suffix: linux-armv7
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build PyInstaller binary
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          docker run --rm --platform ${{ matrix.platform }} \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -w /workspace \
+            python:3.11-bullseye \
+            bash -lc "python -m pip install --upgrade pip && \
+              pip install -e .[dev] && \
+              python -m PyInstaller \
+                --onefile \
+                --console \
+                --name bbl-shutter-cam \
+                --add-data src/bbl_shutter_cam:bbl_shutter_cam \
+                --hidden-import=bleak \
+                --hidden-import=tomlkit \
+                src/bbl_shutter_cam/cli.py"
+
+          mv dist/bbl-shutter-cam dist/bbl-shutter-cam-${VERSION}-${{ matrix.suffix }}
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/bbl-shutter-cam-${{ github.ref_name }}-${{ matrix.suffix }}
