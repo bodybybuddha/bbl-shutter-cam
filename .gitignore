@@ -6,7 +6,9 @@ ENV/
 .env.local
 
 # IDE and editor files
-.vscode/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/*.log
 .idea/
 *.swp
 *.swo
