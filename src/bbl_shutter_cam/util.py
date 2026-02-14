@@ -160,9 +160,8 @@ def configure_logging(
     if log_file:
         path = Path(log_file).expanduser()
         path.parent.mkdir(parents=True, exist_ok=True)
-        LOG.file = path.open(
-            "a", buffering=1, encoding="utf-8"
-        )  # pylint: disable=consider-using-with
+        # pylint: disable=consider-using-with
+        LOG.file = path.open("a", buffering=1, encoding="utf-8")
         LOG.debug(f"Logging to file: {path}")
 
 

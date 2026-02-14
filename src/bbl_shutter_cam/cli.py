@@ -319,7 +319,7 @@ def main(argv: list[str] | None = None) -> None:
         parser.print_help()
         raise SystemExit(2)
 
-    rc = func(args)
+    rc = func(args)  # pylint: disable=not-callable
     raise SystemExit(rc)
 
 
