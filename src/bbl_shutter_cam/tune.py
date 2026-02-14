@@ -313,10 +313,11 @@ def handle_vflip(session: TuningSession) -> None:
 
 def handle_autofocus_mode(session: TuningSession) -> None:
     """Handle autofocus mode setting."""
+    current = session.cam_config.autofocus_mode or "auto"
     print("\nAutofocus Mode:")
-    print("  1. auto")
-    print("  2. manual")
-    print("  3. continuous")
+    print(f"  1. auto{' ←' if current == 'auto' else ' (default)'}")
+    print(f"  2. manual{' ←' if current == 'manual' else ''}")
+    print(f"  3. continuous{' ←' if current == 'continuous' else ''}")
     choice = input("Choose [1-3]: ").strip()
 
     modes = {"1": "auto", "2": "manual", "3": "continuous"}
@@ -329,9 +330,10 @@ def handle_autofocus_mode(session: TuningSession) -> None:
 
 def handle_lens_position(session: TuningSession) -> None:
     """Handle lens position setting."""
+    current = session.cam_config.lens_position if session.cam_config.lens_position is not None else "auto"
     print("\nLens Position (0.0=infinity to ~32.0=close):")
     print("  Typical values: 0.0 (far), 2.0 (mid), 8.0 (near)")
-    val = input("Enter value: ").strip()
+    val = input(f"Enter value [current: {current}]: ").strip()
 
     if val:
         try:
@@ -366,13 +368,14 @@ def handle_ev(session: TuningSession) -> None:
 
 def handle_awb(session: TuningSession) -> None:
     """Handle auto white balance mode."""
+    current = session.cam_config.awb or "auto"
     print("\nAuto White Balance:")
-    print("  1. auto")
-    print("  2. daylight")
-    print("  3. tungsten")
-    print("  4. fluorescent")
-    print("  5. indoor")
-    print("  6. cloudy")
+    print(f"  1. auto{' ←' if current == 'auto' else ' (default)'}")
+    print(f"  2. daylight{' ←' if current == 'daylight' else ''}")
+    print(f"  3. tungsten{' ←' if current == 'tungsten' else ''}")
+    print(f"  4. fluorescent{' ←' if current == 'fluorescent' else ''}")
+    print(f"  5. indoor{' ←' if current == 'indoor' else ''}")
+    print(f"  6. cloudy{' ←' if current == 'cloudy' else ''}")
     choice = input("Choose [1-6]: ").strip()
 
     modes = {
@@ -389,8 +392,9 @@ def handle_awb(session: TuningSession) -> None:
 
 def handle_saturation(session: TuningSession) -> None:
     """Handle saturation setting."""
-    print("\nSaturation (0.0 to 2.0, default 1.0):")
-    val = input("Enter value: ").strip()
+    current = session.cam_config.saturation if session.cam_config.saturation is not None else "1.0 (default)"
+    print(f"\nSaturation (0.0 to 2.0, default 1.0):")
+    val = input(f"Enter value [current: {current}]: ").strip()
 
     if val:
         try:
@@ -406,8 +410,9 @@ def handle_saturation(session: TuningSession) -> None:
 
 def handle_contrast(session: TuningSession) -> None:
     """Handle contrast setting."""
-    print("\nContrast (0.0 to 2.0, default 1.0):")
-    val = input("Enter value: ").strip()
+    current = session.cam_config.contrast if session.cam_config.contrast is not None else "1.0 (default)"
+    print(f"\nContrast (0.0 to 2.0, default 1.0):")
+    val = input(f"Enter value [current: {current}]: ").strip()
 
     if val:
         try:
@@ -423,8 +428,9 @@ def handle_contrast(session: TuningSession) -> None:
 
 def handle_brightness(session: TuningSession) -> None:
     """Handle brightness setting."""
-    print("\nBrightness (-1.0 to 1.0, default 0.0):")
-    val = input("Enter value: ").strip()
+    current = session.cam_config.brightness if session.cam_config.brightness is not None else "0.0 (default)"
+    print(f"\nBrightness (-1.0 to 1.0, default 0.0):")
+    val = input(f"Enter value [current: {current}]: ").strip()
 
     if val:
         try:
@@ -440,8 +446,9 @@ def handle_brightness(session: TuningSession) -> None:
 
 def handle_sharpness(session: TuningSession) -> None:
     """Handle sharpness setting."""
-    print("\nSharpness (0.0 to 2.0, default 1.0):")
-    val = input("Enter value: ").strip()
+    current = session.cam_config.sharpness if session.cam_config.sharpness is not None else "1.0 (default)"
+    print(f"\nSharpness (0.0 to 2.0, default 1.0):")
+    val = input(f"Enter value [current: {current}]: ").strip()
 
     if val:
         try:
@@ -457,11 +464,12 @@ def handle_sharpness(session: TuningSession) -> None:
 
 def handle_denoise(session: TuningSession) -> None:
     """Handle denoise mode."""
+    current = session.cam_config.denoise or "cdn_off"
     print("\nDenoise Mode:")
-    print("  1. off")
-    print("  2. cdn_off")
-    print("  3. cdn_fast")
-    print("  4. cdn_hq")
+    print(f"  1. off{' ←' if current == 'off' else ''}")
+    print(f"  2. cdn_off{' ←' if current == 'cdn_off' else ' (default)'}")
+    print(f"  3. cdn_fast{' ←' if current == 'cdn_fast' else ''}")
+    print(f"  4. cdn_hq{' ←' if current == 'cdn_hq' else ''}")
     choice = input("Choose [1-4]: ").strip()
 
     modes = {"1": "off", "2": "cdn_off", "3": "cdn_fast", "4": "cdn_hq"}
@@ -475,11 +483,12 @@ def handle_denoise(session: TuningSession) -> None:
 
 def handle_metering(session: TuningSession) -> None:
     """Handle metering mode."""
+    current = session.cam_config.metering or "centre"
     print("\nMetering Mode:")
-    print("  1. centre")
-    print("  2. spot")
-    print("  3. matrix")
-    print("  4. custom")
+    print(f"  1. centre{' ←' if current == 'centre' else ' (default)'}")
+    print(f"  2. spot{' ←' if current == 'spot' else ''}")
+    print(f"  3. matrix{' ←' if current == 'matrix' else ''}")
+    print(f"  4. custom{' ←' if current == 'custom' else ''}")
     choice = input("Choose [1-4]: ").strip()
 
     modes = {"1": "centre", "2": "spot", "3": "matrix", "4": "custom"}
@@ -493,8 +502,9 @@ def handle_metering(session: TuningSession) -> None:
 
 def handle_quality(session: TuningSession) -> None:
     """Handle JPEG quality."""
-    print("\nJPEG Quality (0-100, default 93):")
-    val = input("Enter value: ").strip()
+    current = session.cam_config.quality if session.cam_config.quality is not None else "93 (default)"
+    print(f"\nJPEG Quality (0-100, default 93):")
+    val = input(f"Enter value [current: {current}]: ").strip()
 
     if val:
         try:
@@ -510,9 +520,10 @@ def handle_quality(session: TuningSession) -> None:
 
 def handle_shutter(session: TuningSession) -> None:
     """Handle shutter speed."""
+    current = session.cam_config.shutter if session.cam_config.shutter is not None else "auto"
     print("\nShutter Speed (microseconds, e.g., 10000 = 1/100s):")
     print("  Leave empty for auto")
-    val = input("Enter value: ").strip()
+    val = input(f"Enter value [current: {current}]: ").strip()
 
     if val:
         try:
@@ -528,9 +539,10 @@ def handle_shutter(session: TuningSession) -> None:
 
 def handle_gain(session: TuningSession) -> None:
     """Handle analog gain."""
+    current = session.cam_config.gain if session.cam_config.gain is not None else "auto"
     print("\nAnalog Gain (typically 1.0-16.0):")
     print("  Leave empty for auto")
-    val = input("Enter value: ").strip()
+    val = input(f"Enter value [current: {current}]: ").strip()
 
     if val:
         try:
