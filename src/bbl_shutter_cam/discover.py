@@ -291,7 +291,7 @@ async def run_profile(
                     except subprocess.CalledProcessError as e:
                         LOG.error(f"rpicam-still failed: {e}")
 
-            await client.start_notify(notify_uuid, on_notify)
+            await client.start_notify(notify_uuid, on_notify)  # type: ignore[arg-type]
             LOG.info("Listening… (Ctrl+C to quit)")
 
             while client.is_connected:
@@ -373,7 +373,7 @@ async def debug_signals(
             return
 
         # Track signals by UUID
-        seen_data = {}
+        seen_data: dict[str, set[bytes]] = {}
 
         def make_callback(uuid: str):
             def callback(_sender: int, data: bytearray) -> None:

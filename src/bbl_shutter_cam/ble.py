@@ -145,7 +145,7 @@ async def start_notify_best_effort(
     active: List[str] = []
     for uuid in uuids:
         try:
-            await client.start_notify(uuid, callback_factory(uuid))
+            await client.start_notify(uuid, callback_factory(uuid))  # type: ignore[arg-type]
             active.append(uuid)
         except Exception as e:
             LOG.debug(f"start_notify failed for {uuid}: {e.__class__.__name__}: {e}")

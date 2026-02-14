@@ -67,7 +67,7 @@ def setup_logging(
     if use_color:
         formatter = ColorFormatter(fmt="%(levelname)s | %(name)s | %(message)s")
     else:
-        formatter = logging.Formatter(
+        formatter = logging.Formatter(  # type: ignore[assignment]
             fmt="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )

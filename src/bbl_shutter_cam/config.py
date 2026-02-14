@@ -60,12 +60,12 @@ def ensure_config_exists(path: Path = DEFAULT_CONFIG_PATH) -> None:
     cfg["profiles"] = document()
 
     # Minimal default profile
-    cfg["profiles"]["default"] = document()
-    cfg["profiles"]["default"]["device"] = {
+    cfg["profiles"]["default"] = document()  # type: ignore[index]
+    cfg["profiles"]["default"]["device"] = {  # type: ignore[index]
         "name": "BBL_SHUTTER",
         # mac and notify_uuid learned during setup
     }
-    cfg["profiles"]["default"]["camera"] = {
+    cfg["profiles"]["default"]["camera"] = {  # type: ignore[index]
         "output_dir": str(Path.home() / "captures" / "default"),
         "filename_format": "%Y%m%d_%H%M%S.jpg",
         "min_interval_sec": 0.5,
@@ -170,7 +170,7 @@ def load_profile(path: Path, profile_name: str | None) -> Dict[str, Any]:
     # Attach resolved name for convenience
     prof["_profile_name"] = profile_name
 
-    return prof
+    return prof  # type: ignore[return-value]
 
 
 def get_trigger_events(profile: Dict[str, Any]) -> list[Dict[str, Any]]:
@@ -224,7 +224,7 @@ def get_trigger_events(profile: Dict[str, Any]) -> list[Dict[str, Any]]:
             },
         ]
 
-    return events
+    return events  # type: ignore[return-value]
 
 
 def get_event_trigger_bytes(profile: Dict[str, Any]) -> list[bytes]:
