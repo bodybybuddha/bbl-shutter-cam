@@ -34,6 +34,7 @@ jobs:
           docker run --rm --platform ${{ matrix.platform }} \
             -v "$GITHUB_WORKSPACE:/workspace" \
             -w /workspace \
+            -e VERSION="${{ github.ref_name }}" \
             python:3.11-bullseye \
             bash -lc "python -m pip install --upgrade pip && \
               pip install -e .[dev] && \
@@ -44,9 +45,8 @@ jobs:
                 --add-data src/bbl_shutter_cam:bbl_shutter_cam \
                 --hidden-import=bleak \
                 --hidden-import=tomlkit \
-                src/bbl_shutter_cam/cli.py"
-
-          mv dist/bbl-shutter-cam dist/bbl-shutter-cam-${VERSION}-${{ matrix.suffix }}
+                src/bbl_shutter_cam/cli.py && \
+              mv dist/bbl-shutter-cam dist/bbl-shutter-cam-\${VERSION}-${{ matrix.suffix }}"
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
