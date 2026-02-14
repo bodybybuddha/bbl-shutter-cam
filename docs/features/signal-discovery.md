@@ -436,5 +436,5 @@ Otherwise, re-edit manually or re-run discovery.
 ## Next Steps
 
 - **Ready to run?** → [Quick Start Guide](../user-guide/quick-start.md)
-- **Need to tune camera?** → [Camera Settings](../user-guide/camera-settings.md) (v0.2.0+)
+- **Need to tune camera?** → [Camera Settings](../user-guide/camera-settings.md)
 - **More help?** → [Troubleshooting](../troubleshooting.md) or [FAQ](../faq.md)

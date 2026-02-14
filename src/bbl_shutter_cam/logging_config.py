@@ -6,7 +6,6 @@ for different deployment scenarios (development, headless, systemd).
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -15,19 +14,17 @@ class ColorFormatter(logging.Formatter):
     """Formatter that adds color codes for terminal output."""
 
     COLORS = {
-        logging.DEBUG: "\033[36m",      # cyan
-        logging.INFO: "\033[32m",       # green
-        logging.WARNING: "\033[33m",    # yellow
-        logging.ERROR: "\033[31m",      # red
-        logging.CRITICAL: "\033[35m",   # magenta
+        logging.DEBUG: "\033[36m",  # cyan
+        logging.INFO: "\033[32m",  # green
+        logging.WARNING: "\033[33m",  # yellow
+        logging.ERROR: "\033[31m",  # red
+        logging.CRITICAL: "\033[35m",  # magenta
     }
     RESET = "\033[0m"
 
     def format(self, record: logging.LogRecord) -> str:
         if record.levelno in self.COLORS:
-            record.levelname = (
-                f"{self.COLORS[record.levelno]}{record.levelname}{self.RESET}"
-            )
+            record.levelname = f"{self.COLORS[record.levelno]}{record.levelname}{self.RESET}"
         return super().format(record)
 
 
@@ -68,11 +65,9 @@ def setup_logging(
     console_handler.setLevel(getattr(logging, level.upper()))
 
     if use_color:
-        formatter = ColorFormatter(
-            fmt="%(levelname)s | %(name)s | %(message)s"
-        )
+        formatter = ColorFormatter(fmt="%(levelname)s | %(name)s | %(message)s")
     else:
-        formatter = logging.Formatter(
+        formatter = logging.Formatter(  # type: ignore[assignment]
             fmt="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )
@@ -95,7 +90,7 @@ def setup_logging(
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
 
-        logger.info(f"Logging to file: {log_path}")
+        logger.info("Logging to file: %s", log_path)
 
     return logger
 

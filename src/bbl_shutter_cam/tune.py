@@ -13,14 +13,13 @@ making it suitable for SSH/headless operation.
 from __future__ import annotations
 
 import subprocess
-import sys
-from dataclasses import asdict, replace
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
-from .camera import CameraConfig, build_rpicam_still_cmd, camera_config_from_profile
-from .config import DEFAULT_CONFIG_PATH, load_config, load_profile, save_config
+from .camera import build_rpicam_still_cmd, camera_config_from_profile
+from .config import load_config, load_profile, save_config
 from .util import LOG
 
 
@@ -107,12 +106,26 @@ class TuningSession:
 
         # Update all tunable settings
         tunable_fields = [
-            "width", "height", "rotation", "hflip", "vflip",
-            "awb", "ev", "denoise", "sharpness",
-            "shutter", "gain", "awbgains",
-            "saturation", "contrast", "brightness",
-            "metering", "autofocus_mode", "lens_position",
-            "quality", "timeout"
+            "width",
+            "height",
+            "rotation",
+            "hflip",
+            "vflip",
+            "awb",
+            "ev",
+            "denoise",
+            "sharpness",
+            "shutter",
+            "gain",
+            "awbgains",
+            "saturation",
+            "contrast",
+            "brightness",
+            "metering",
+            "autofocus_mode",
+            "lens_position",
+            "quality",
+            "timeout",
         ]
 
         for field in tunable_fields:
@@ -139,31 +152,49 @@ class TuningSession:
 
         print("RESOLUTION & ORIENTATION:")
         print(f"  Resolution: {self.cam_config.width}x{self.cam_config.height}")
-        print(f"  Rotation:   {self.cam_config.rotation if self.cam_config.rotation is not None else 'default (0)'}")
+        print(
+            f"  Rotation:   {self.cam_config.rotation if self.cam_config.rotation is not None else 'default (0)'}"
+        )
         print(f"  H-Flip:     {self.cam_config.hflip}")
         print(f"  V-Flip:     {self.cam_config.vflip}")
         print()
 
         print("FOCUS:")
         print(f"  AF Mode:    {self.cam_config.autofocus_mode or 'default'}")
-        print(f"  Lens Pos:   {self.cam_config.lens_position if self.cam_config.lens_position is not None else 'auto'}")
+        print(
+            f"  Lens Pos:   {self.cam_config.lens_position if self.cam_config.lens_position is not None else 'auto'}"
+        )
         print()
 
         print("EXPOSURE & COLOR:")
         print(f"  EV:         {self.cam_config.ev if self.cam_config.ev is not None else '0'}")
         print(f"  AWB:        {self.cam_config.awb or 'auto'}")
-        print(f"  Saturation: {self.cam_config.saturation if self.cam_config.saturation is not None else 'default'}")
-        print(f"  Contrast:   {self.cam_config.contrast if self.cam_config.contrast is not None else 'default'}")
-        print(f"  Brightness: {self.cam_config.brightness if self.cam_config.brightness is not None else 'default'}")
-        print(f"  Sharpness:  {self.cam_config.sharpness if self.cam_config.sharpness is not None else 'default'}")
+        print(
+            f"  Saturation: {self.cam_config.saturation if self.cam_config.saturation is not None else 'default'}"
+        )
+        print(
+            f"  Contrast:   {self.cam_config.contrast if self.cam_config.contrast is not None else 'default'}"
+        )
+        print(
+            f"  Brightness: {self.cam_config.brightness if self.cam_config.brightness is not None else 'default'}"
+        )
+        print(
+            f"  Sharpness:  {self.cam_config.sharpness if self.cam_config.sharpness is not None else 'default'}"
+        )
         print()
 
         print("ADVANCED:")
         print(f"  Denoise:    {self.cam_config.denoise or 'default'}")
         print(f"  Metering:   {self.cam_config.metering or 'default'}")
-        print(f"  Quality:    {self.cam_config.quality if self.cam_config.quality is not None else 'default (93)'}")
-        print(f"  Shutter:    {self.cam_config.shutter if self.cam_config.shutter is not None else 'auto'} µs")
-        print(f"  Gain:       {self.cam_config.gain if self.cam_config.gain is not None else 'auto'}")
+        print(
+            f"  Quality:    {self.cam_config.quality if self.cam_config.quality is not None else 'default (93)'}"
+        )
+        print(
+            f"  Shutter:    {self.cam_config.shutter if self.cam_config.shutter is not None else 'auto'} µs"
+        )
+        print(
+            f"  Gain:       {self.cam_config.gain if self.cam_config.gain is not None else 'auto'}"
+        )
         print()
 
 
@@ -281,9 +312,11 @@ def handle_save_and_exit(session: TuningSession) -> None:
 def handle_rotation(session: TuningSession) -> None:
     """Handle rotation setting."""
     print("\nRotation (0, 90, 180, 270):")
-    val = input("Enter value [current: {}]: ".format(
-        session.cam_config.rotation if session.cam_config.rotation is not None else "0"
-    )).strip()
+    val = input(
+        "Enter value [current: {}]: ".format(
+            session.cam_config.rotation if session.cam_config.rotation is not None else "0"
+        )
+    ).strip()
 
     if val:
         try:
@@ -330,7 +363,9 @@ def handle_autofocus_mode(session: TuningSession) -> None:
 
 def handle_lens_position(session: TuningSession) -> None:
     """Handle lens position setting."""
-    current = session.cam_config.lens_position if session.cam_config.lens_position is not None else "auto"
+    current = (
+        session.cam_config.lens_position if session.cam_config.lens_position is not None else "auto"
+    )
     print("\nLens Position (0.0=infinity to ~32.0=close):")
     print("  Typical values: 0.0 (far), 2.0 (mid), 8.0 (near)")
     val = input(f"Enter value [current: {current}]: ").strip()
@@ -350,9 +385,11 @@ def handle_lens_position(session: TuningSession) -> None:
 def handle_ev(session: TuningSession) -> None:
     """Handle exposure compensation."""
     print("\nExposure Compensation (-10 to +10):")
-    val = input("Enter value [current: {}]: ".format(
-        session.cam_config.ev if session.cam_config.ev is not None else "0"
-    )).strip()
+    val = input(
+        "Enter value [current: {}]: ".format(
+            session.cam_config.ev if session.cam_config.ev is not None else "0"
+        )
+    ).strip()
 
     if val:
         try:
@@ -379,8 +416,12 @@ def handle_awb(session: TuningSession) -> None:
     choice = input("Choose [1-6]: ").strip()
 
     modes = {
-        "1": "auto", "2": "daylight", "3": "tungsten",
-        "4": "fluorescent", "5": "indoor", "6": "cloudy"
+        "1": "auto",
+        "2": "daylight",
+        "3": "tungsten",
+        "4": "fluorescent",
+        "5": "indoor",
+        "6": "cloudy",
     }
 
     if choice in modes:
@@ -392,7 +433,11 @@ def handle_awb(session: TuningSession) -> None:
 
 def handle_saturation(session: TuningSession) -> None:
     """Handle saturation setting."""
-    current = session.cam_config.saturation if session.cam_config.saturation is not None else "1.0 (default)"
+    current = (
+        session.cam_config.saturation
+        if session.cam_config.saturation is not None
+        else "1.0 (default)"
+    )
     print(f"\nSaturation (0.0 to 2.0, default 1.0):")
     val = input(f"Enter value [current: {current}]: ").strip()
 
@@ -410,7 +455,9 @@ def handle_saturation(session: TuningSession) -> None:
 
 def handle_contrast(session: TuningSession) -> None:
     """Handle contrast setting."""
-    current = session.cam_config.contrast if session.cam_config.contrast is not None else "1.0 (default)"
+    current = (
+        session.cam_config.contrast if session.cam_config.contrast is not None else "1.0 (default)"
+    )
     print(f"\nContrast (0.0 to 2.0, default 1.0):")
     val = input(f"Enter value [current: {current}]: ").strip()
 
@@ -428,7 +475,11 @@ def handle_contrast(session: TuningSession) -> None:
 
 def handle_brightness(session: TuningSession) -> None:
     """Handle brightness setting."""
-    current = session.cam_config.brightness if session.cam_config.brightness is not None else "0.0 (default)"
+    current = (
+        session.cam_config.brightness
+        if session.cam_config.brightness is not None
+        else "0.0 (default)"
+    )
     print(f"\nBrightness (-1.0 to 1.0, default 0.0):")
     val = input(f"Enter value [current: {current}]: ").strip()
 
@@ -446,7 +497,11 @@ def handle_brightness(session: TuningSession) -> None:
 
 def handle_sharpness(session: TuningSession) -> None:
     """Handle sharpness setting."""
-    current = session.cam_config.sharpness if session.cam_config.sharpness is not None else "1.0 (default)"
+    current = (
+        session.cam_config.sharpness
+        if session.cam_config.sharpness is not None
+        else "1.0 (default)"
+    )
     print(f"\nSharpness (0.0 to 2.0, default 1.0):")
     val = input(f"Enter value [current: {current}]: ").strip()
 
@@ -502,7 +557,9 @@ def handle_metering(session: TuningSession) -> None:
 
 def handle_quality(session: TuningSession) -> None:
     """Handle JPEG quality."""
-    current = session.cam_config.quality if session.cam_config.quality is not None else "93 (default)"
+    current = (
+        session.cam_config.quality if session.cam_config.quality is not None else "93 (default)"
+    )
     print(f"\nJPEG Quality (0-100, default 93):")
     val = input(f"Enter value [current: {current}]: ").strip()
 

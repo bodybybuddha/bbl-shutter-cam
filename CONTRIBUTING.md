@@ -214,6 +214,21 @@ python -m pytest tests/ -v --cov=src/bbl_shutter_cam --cov-report=html
 
 View report: Open `htmlcov/index.html` in your browser.
 
+### CI Expectations
+
+GitHub Actions runs lint and tests on every PR to `main` and `dev`:
+- **Lint**: black, pylint, mypy
+- **Tests**: pytest with an 80% coverage gate
+
+Make sure your changes pass locally before opening a PR:
+
+```bash
+python -m pytest tests/ -v
+python -m black --check src/ tests/ scripts/
+python -m pylint src/bbl_shutter_cam/
+python -m mypy src/bbl_shutter_cam/
+```
+
 ### Writing Tests
 
 - Test files go in `tests/` with `test_*.py` naming

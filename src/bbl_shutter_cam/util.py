@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import IntEnum
+import os
 from pathlib import Path
 from typing import Any, Iterable, Optional, TextIO
 
@@ -24,6 +25,7 @@ class LogLevel(IntEnum):
         WARNING: 30 - Warning messages for potentially problematic situations
         ERROR: 40 - Error messages for serious problems
     """
+
     DEBUG = 10
     INFO = 20
     WARNING = 30
@@ -53,6 +55,7 @@ class Logger:
         >>> LOG.info("Starting application")
         2026-02-14 12:34:56 [=] Starting application
     """
+
     level: LogLevel = LogLevel.INFO
     fmt: str = "plain"  # "plain" | "time"
     file: Optional[TextIO] = None
@@ -157,7 +160,8 @@ def configure_logging(
     if log_file:
         path = Path(log_file).expanduser()
         path.parent.mkdir(parents=True, exist_ok=True)
-        LOG.file = path.open("a", buffering=1)
+        # pylint: disable=consider-using-with
+        LOG.file = path.open("a", buffering=1, encoding="utf-8")
         LOG.debug(f"Logging to file: {path}")
 
 
@@ -174,7 +178,9 @@ def expand_path(p: str | Path) -> Path:
         >>> expand_path("~/documents")
         PosixPath('/home/user/documents')
     """
-    return Path(p).expanduser()
+    expanded = os.path.expandvars(str(p))
+    path = Path(expanded).expanduser()
+    return path.resolve(strict=False)
 
 
 def ensure_dir(p: str | Path) -> Path:
@@ -215,6 +221,12 @@ def safe_get(d: dict, keys: Iterable[str], default: Any = None) -> Any:
         >>> safe_get(config, ["server", "ssl"], default=False)
         False
     """
+    cur: Any = d
+    for key in keys:
+        if not isinstance(cur, dict) or key not in cur:
+            return default
+        cur = cur[key]
+    return cur
 
 
 def fmt_kv(title: str, value: Optional[Any]) -> str:
@@ -235,3 +247,4 @@ def fmt_kv(title: str, value: Optional[Any]) -> str:
         >>> fmt_kv("Optional", None)
         'Optional: '
     """
+    return f"{title}: {'' if value is None else value}"

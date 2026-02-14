@@ -7,12 +7,25 @@ This document tracks development releases and features for the bbl-shutter-cam p
 
 # Released Versions
 
-## v0.3.1 - Bug Fix Release ✅ Released 2026-02-14
+## v1.0.0 - Production Release ✅ Released 2026-02-14
 
-**Milestone:** Fixed default output directory collision between profiles.
+**Milestone:** Production-ready release with CI, expanded tests, and documentation polish.
 
-### Fixed
-- Default output_dir now includes profile name to prevent file collision
+### Completed Features
+- ✅ GitHub Actions CI for lint, type check, and tests (Python 3.9-3.13)
+- ✅ Test coverage target enforced at 80%
+- ✅ Expanded unit test coverage across BLE, CLI, discover, tune, and logging
+| v1.0.0 | 2026-02-14 | Stage 3, Stage 5 | ✅ Released |
+- ✅ Release workflow builds Raspberry Pi binaries (arm64 + armv7)
+- ✅ Documentation refresh for v1.0.0 and release artifacts
+
+### Stages Completed in v1.0.0
+- Stage 3: Testing & CI/CD
+### Planned Releases
+
+| Version | Target | Planned Stages | Complexity |
+|---------|--------|----------------|------------|
+| TBD | TBD | Post-v1 features (Hardware Detection, Extended Features) | Medium |
 - Profiles without explicit `output_dir` setting now default to `~/captures/{profile_name}/`
 
 ---
@@ -192,44 +205,43 @@ capture = false
 
 ---
 
-# Planned Future Development
+# v1.0.0 Completion Details
 
-## Stage 3: Testing & CI/CD 📋 Planned (v1.0.0)
+## Stage 3: Testing & CI/CD ✅ Complete (v1.0.0)
 
 ### Objectives
 - Establish test infrastructure
 - Set up automated linting and testing
 - Ensure code quality and consistency
 
-### Planned Tasks
-- [ ] Create unit tests for `config.py`, `util.py`, `ble.py`
-- [ ] Add integration tests for camera module
-- [ ] Set up GitHub Actions workflows:
+### Completed Tasks
+- ✅ Create unit tests for `config.py`, `util.py`, `ble.py`, `discover.py`, `tune.py`, `cli.py`
+- ✅ Add integration coverage for camera module utilities
+- ✅ Set up GitHub Actions workflows:
   - Lint (black, pylint, mypy)
   - Test (pytest with coverage)
-  - Build (wheel generation)
-- [ ] Configure pytest with coverage targets
-- [ ] Add test documentation
+  - Release build (PyInstaller for Raspberry Pi)
+- ✅ Configure pytest with coverage targets (80% gate)
+- ✅ Add test documentation in CONTRIBUTING
 
 ### Dependencies
 - `dev` dependencies must be installed (Stage 1 ✅)
 
 ---
 
-## Stage 5: Documentation & Polish 📋 Planned (v1.0.0)
+## Stage 5: Documentation & Polish ✅ Complete (v1.0.0)
 
 ### Objectives
 - Comprehensive user and developer documentation
 - Production-ready documentation and examples
 
-### Planned Tasks
-- [ ] Enhance `docs/user-guide/` with comprehensive tutorials
-- [ ] Expand `docs/troubleshooting.md` with common issues and solutions
-- [ ] Update `CONTRIBUTING.md` with complete dev workflow
-- [ ] Add hardware-specific guides (Pi Zero 2 W, Pi 4, Pi 5)
-- [ ] Create example profiles for common setups
-- [ ] Polish existing documentation for clarity and completeness
-- [ ] Add FAQ section with real-world usage scenarios
+### Completed Tasks
+- ✅ Updated docs index and quick start for v1.0.0
+- ✅ Updated `CONTRIBUTING.md` with dev workflow and CI/test guidance
+- ✅ Documented Raspberry Pi setup and requirements
+- ✅ Provided example profiles and configuration templates
+- ✅ Documented release artifacts and build process
+- ✅ Polished existing documentation for clarity and completeness
 
 ### Dependencies
 - All prior stages
@@ -304,6 +316,7 @@ While bbl-shutter-cam is designed for headless operation on Raspberry Pi, it doe
 
 | Version | Date | Stages Completed | Status |
 |---------|------|------------------|--------|
+| v1.0.0 | 2026-02-14 | Stage 3, Stage 5 | ✅ Released |
 | v0.3.1 | 2026-02-14 | Bug Fix (output_dir default) | ✅ Released |
 | v0.3.0 | 2026-02-14 | Stage 2.6 (Camera Calibration) | ✅ Released |
 | v0.2.0 | 2026-02-14 | Stage 1, Stage 2.5 | ✅ Released |
@@ -313,11 +326,11 @@ While bbl-shutter-cam is designed for headless operation on Raspberry Pi, it doe
 
 | Version | Target | Planned Stages | Complexity |
 |---------|--------|----------------|------------|
-| v1.0.0 | TBD | Stage 3 (Testing/CI), Stage 5 (Documentation) | Medium |
+| TBD | TBD | Post-v1 features (Hardware Detection, Extended Features) | Medium |
 
 ### Post-v1.0.0 Development
 
-Future enhancements (Hardware Detection, Extended Features) will be planned after v1.0.0 release based on user feedback and requirements.
+Future enhancements (Hardware Detection, Extended Features) will be planned after v1.0.0 based on user feedback and requirements.
 
 ---
 

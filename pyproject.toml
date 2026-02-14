@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bbl-shutter-cam"
-version = "0.2.0"
+version = "1.0.0"
 description = "Use a Bambu Cyberbrick BBL_SHUTTER BLE trigger to capture photos on Raspberry Pi (rpicam-still)."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -12,7 +12,7 @@ license = { text = "MIT" }
 authors = [{ name = "Casa Taylor" }]
 keywords = ["raspberry-pi", "bluetooth", "ble", "timelapse", "bambu", "rpicam"]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
@@ -56,7 +56,7 @@ where = ["src"]
 
 [tool.black]
 line-length = 100
-target-version = ["py39", "py310", "py311", "py312", "py313"]
+target-version = ["py39", "py310", "py311", "py312"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -77,7 +77,16 @@ extend-exclude = '''
 disable = [
   "C0103",  # invalid-name
   "C0114",  # missing-module-docstring
+  "C0209",  # consider-using-f-string
+  "C0301",  # line-too-long
+  "C0415",  # import-outside-toplevel
   "R0913",  # too-many-arguments
+  "R0902",  # too-many-instance-attributes
+  "R0912",  # too-many-branches
+  "R0914",  # too-many-locals
+  "R0915",  # too-many-statements
+  "W0718",  # broad-exception-caught
+  "W1309",  # f-string-without-interpolation
 ]
 
 [tool.pylint.format]

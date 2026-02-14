@@ -22,27 +22,23 @@ from .camera import build_rpicam_still_cmd, camera_config_from_profile, make_out
 from .config import update_profile_device_fields
 from .util import LOG
 
-# Deprecated: Use dynamically loaded events from config instead.
-# Kept for reference / backward compatibility only.
-# PRESS_BYTES = b"\x40\x00"              # Manual button press
-# BAMBU_STUDIO_TRIGGER = b"\x80\x00"      # Bambu Studio app trigger
-# RELEASE_BYTES = b"\x00\x00"
-
+# Default press bytes for notify UUID learning.
+PRESS_BYTES = b"\x40\x00"  # Manual button press
 
 
 async def scan(name_filter: Optional[str] = None, timeout: float = 8.0):
     """Scan for nearby BLE devices.
-    
+
     Performs a BLE scan and optionally filters results by device name.
-    
+
     Args:
         name_filter: Optional device name to filter by (exact match); if None,
                     returns all discovered devices
         timeout: Scan duration in seconds
-    
+
     Returns:
         List of BleakDevice objects discovered
-    
+
     Example:
         >>> devices = await scan(name_filter="BBL_SHUTTER", timeout=10)
         >>> for dev in devices:
@@ -66,27 +62,27 @@ async def scan(name_filter: Optional[str] = None, timeout: float = 8.0):
 
 async def learn_notify_uuid(mac: str, press_timeout: float = 30.0, verbose: bool = False) -> str:
     """Interactively learn which characteristic sends shutter button signals.
-    
+
     Connects to a device, subscribes to all notify characteristics, and waits
     for a button press event. Returns the UUID of the characteristic that
     produced the signal.
-    
+
     Args:
         mac: Device MAC address (e.g., "AA:BB:CC:DD:EE:FF")
         press_timeout: Seconds to wait for a button press before timing out
         verbose: Whether to print all received notifications while waiting
-    
+
     Returns:
         UUID of the characteristic that sent the button press signal
-    
+
     Raises:
         RuntimeError: If no notify characteristics found or subscription fails
         asyncio.TimeoutError: If no signal is received within press_timeout
-    
+
     Example:
         >>> uuid = await learn_notify_uuid("AA:BB:CC:DD:EE:FF", press_timeout=30)
         >>> print(f"Press signal comes from UUID: {uuid}")
-    
+
     Note:
         The device must send the button press while this function is running.
         Takes approximately 2-5 seconds to connect and discover characteristics.
@@ -120,7 +116,9 @@ async def learn_notify_uuid(mac: str, press_timeout: float = 30.0, verbose: bool
         if not active:
             raise RuntimeError("Could not subscribe to any notify characteristics.")
 
-        LOG.info(f"Learning notify UUID: press the shutter button now (timeout {int(press_timeout)}s)…")
+        LOG.info(
+            f"Learning notify UUID: press the shutter button now (timeout {int(press_timeout)}s)…"
+        )
         try:
             uuid = await asyncio.wait_for(found, timeout=press_timeout)
             LOG.info(f"Learned notify UUID: {uuid}")
@@ -144,12 +142,12 @@ async def setup_profile(
     verbose: bool = False,
 ) -> Optional[Tuple[str, str]]:
     """Complete interactive setup for a new or existing profile.
-    
+
     High-level setup that:
     1. Scans for the device by name (or uses provided MAC)
     2. Learns the notify UUID by waiting for a button press
     3. Writes configuration to config.toml
-    
+
     Args:
         config_path: Path to config.toml file
         profile: Profile name to create/update
@@ -158,10 +156,10 @@ async def setup_profile(
         scan_timeout: BLE scan timeout in seconds
         press_timeout: Time to wait for button press in seconds
         verbose: Print BLE notifications while learning
-    
+
     Returns:
         Tuple of (mac, notify_uuid) on success, None on failure
-    
+
     Example:
         >>> result = await setup_profile(config_path, "office")
         >>> if result:
@@ -190,11 +188,11 @@ async def run_profile(
     reconnect_delay: float = 2.0,
 ) -> None:
     """Main event loop: listen for shutter signals and capture photos.
-    
+
     Connects to the BLE device from the profile and listens for configured
     trigger events. On each trigger, captures a photo using rpicam-still with
     settings from the profile. Automatically reconnects on connection loss.
-    
+
     Args:
         profile: Profile dict (from load_profile()) containing:
             - device.mac: Device MAC address
@@ -204,14 +202,14 @@ async def run_profile(
         dry_run: If True, log triggers but don't actually capture photos
         verbose: Print BLE notification payloads as received
         reconnect_delay: Seconds between reconnection attempts
-    
+
     Raises:
         SystemExit: If profile is missing required fields (MAC, notify_uuid)
-    
+
     Note:
         This function runs indefinitely. Press Ctrl+C to stop.
         Will automatically reconnect if the device disconnects.
-    
+
     Example:
         >>> prof = load_profile(config_path, "office")
         >>> await run_profile(prof, dry_run=False, verbose=True)
@@ -224,7 +222,9 @@ async def run_profile(
     notify_uuid = dev.get("notify_uuid")
 
     if not mac:
-        raise SystemExit("[!] Profile has no device.mac. Run: bbl-shutter-cam setup --profile <name>")
+        raise SystemExit(
+            "[!] Profile has no device.mac. Run: bbl-shutter-cam setup --profile <name>"
+        )
     if not notify_uuid:
         raise SystemExit("[!] Profile has no device.notify_uuid. Run setup to learn it.")
 
@@ -291,7 +291,7 @@ async def run_profile(
                     except subprocess.CalledProcessError as e:
                         LOG.error(f"rpicam-still failed: {e}")
 
-            await client.start_notify(notify_uuid, on_notify)
+            await client.start_notify(notify_uuid, on_notify)  # type: ignore[arg-type]
             LOG.info("Listening… (Ctrl+C to quit)")
 
             while client.is_connected:
@@ -319,32 +319,32 @@ async def debug_signals(
     update_config: bool = False,
 ) -> None:
     """Listen for all BLE signals and log them for analysis.
-    
+
     Connects to a device and captures all BLE notifications, printing each one
     with hex, decimal, and length information. Useful for discovering new trigger
     signals or debugging connection issues.
-    
+
     Optionally updates the profile configuration with discovered signals
     automatically.
-    
+
     Args:
         config_path: Path to config.toml file
         profile_name: Profile name to optionally update with discovered signals
         mac: Device MAC address to connect to
         duration: Listen duration in seconds (0 = listen indefinitely)
         update_config: If True, automatically save discovered signals to config
-    
+
     Output Format (for each signal received):
         [HH:MM:SS.mmm] <UUID>
                    HEX: <uppercase hex string>
                    DEC: <space-separated decimal values>
                    LEN: <number of bytes>
-    
+
     Final Summary:
         - Lists each UUID
         - Shows unique signals from that UUID with receive count
         - Updates config if requested
-    
+
     Example:
         >>> await debug_signals(
         ...     Path("~/.config/bbl-shutter-cam/config.toml"),
@@ -373,7 +373,7 @@ async def debug_signals(
             return
 
         # Track signals by UUID
-        seen_data = {}
+        seen_data: dict[str, list[bytes]] = {}
 
         def make_callback(uuid: str):
             def callback(_sender: int, data: bytearray) -> None:
@@ -455,23 +455,23 @@ def _update_config_with_signals(
     seen_data: Dict[str, list],
 ) -> None:
     """Update profile configuration with discovered BLE signals.
-    
+
     Takes the signals captured by debug_signals() and writes them to the
     profile's device.events section in config.toml. Automatically marks
     all signals except "0000" (release) for photo capture.
-    
+
     Args:
         config_path: Path to config.toml file
         profile_name: Profile name to update
         seen_data: Dict mapping UUID -> list of signal bytes objects
                   (typically from debug_signals())
-    
+
     Notes:
         - Signal "0000" is automatically marked as non-capturing (release event)
         - Other signals are marked for capture by default
         - Includes signal frequency count in config for reference
         - Logs success/failure via LOG
-    
+
     Raises:
         No exceptions; errors are logged and printed to user
     """
@@ -507,12 +507,14 @@ def _update_config_with_signals(
             for hex_sig, count in sorted(unique_signals.items(), key=lambda x: -x[1]):
                 # Skip release signals by default
                 should_capture = hex_sig != "0000"
-                events.append({
-                    "uuid": uuid,
-                    "hex": hex_sig,
-                    "count": count,
-                    "capture": should_capture,
-                })
+                events.append(
+                    {
+                        "uuid": uuid,
+                        "hex": hex_sig,
+                        "count": count,
+                        "capture": should_capture,
+                    }
+                )
 
         prof["device"]["events"] = events
         save_config(cfg, config_path)
@@ -523,4 +525,3 @@ def _update_config_with_signals(
 
     except Exception as e:
         LOG.error(f"Failed to update config: {e}")
-

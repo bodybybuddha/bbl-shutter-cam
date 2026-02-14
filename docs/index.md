@@ -68,7 +68,7 @@ bbl-shutter-cam debug --profile p1s-office --duration 120 --update-config
 # While the printer is running, Bambu Studio can trigger captures via app
 ```
 
-### 3. **Tune Camera Settings** (optional, coming in v0.2.0)
+### 3. **Tune Camera Settings** (optional)
 ```bash
 # Adjust rotation, focus, exposure, white balance interactively
 bbl-shutter-cam tune --profile p1s-office
@@ -112,7 +112,7 @@ sftp pi@raspberrypi.local
 
 ## Project Status
 
-**Current Version:** v0.2.0 (Alpha)
+**Current Version:** v1.0.0 (Stable)
 
 ### Implemented Features
 - ✅ BLE device discovery & setup
@@ -120,15 +120,16 @@ sftp pi@raspberrypi.local
 - ✅ Bambu Studio app trigger support (0x8000 signal)
 - ✅ Dynamic signal discovery mode (`bbl-shutter-cam debug`)
 - ✅ Profile-based configuration
+- ✅ Interactive camera calibration mode (`bbl-shutter-cam tune`)
 - ✅ Extensive camera options (resolution, rotation, flip, quality settings)
 - ✅ Dry-run mode for testing
 - ✅ Verbose logging for debugging
+- ✅ CI linting/testing with coverage targets
 
-### Planned Features (v0.2.0+)
-- 🔜 Interactive camera calibration mode (`bbl-shutter-cam tune`)
-- 🔜 Systemd service template & auto-start
-- 🔜 Unit tests & CI/CD pipelines
+### Planned Features (Post-v1)
+- 🔜 Hardware detection and setup wizard
 - 🔜 Web-based configuration UI
+- 🔜 Multi-camera support
 
 See [ROADMAP.md](../ROADMAP.md) for detailed development timeline.
 

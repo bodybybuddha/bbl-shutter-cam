@@ -377,12 +377,14 @@ Then open pull request on GitHub.
 3. Create git tag:
 
 ```bash
-git tag -a v0.2.0 -m "Version 0.2.0 release"
-git push origin v0.2.0
+git tag -a v1.0.0 -m "Version 1.0.0 release"
+git push origin v1.0.0
 ```
 
 4. Create GitHub Release with release notes
-5. Build distribution:
+    - Publishing the release triggers automated Raspberry Pi builds
+    - Artifacts are attached to the release (arm64 + armv7)
+5. Build distribution (optional for PyPI):
 
 ```bash
 pip install build

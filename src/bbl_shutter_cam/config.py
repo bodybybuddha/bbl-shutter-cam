@@ -13,13 +13,13 @@ Configuration file location:
 Configuration structure:
     [settings]
     default_profile = "office"
-    
+
     [profiles.office]
     [profiles.office.device]
     name = "BBL_SHUTTER"
     mac = "AA:BB:CC:DD:EE:FF"
     notify_uuid = "00002a4d-0000-1000-8000-00805f9b34fb"
-    
+
     [profiles.office.camera]
     output_dir = "~/captures/office"
     [profiles.office.camera.rpicam]
@@ -39,13 +39,13 @@ DEFAULT_CONFIG_PATH = Path.home() / ".config" / APP_NAME / "config.toml"
 
 def ensure_config_exists(path: Path = DEFAULT_CONFIG_PATH) -> None:
     """Ensure a config.toml exists; create with defaults if missing.
-    
+
     Creates parent directories automatically and initializes with a minimal
     "default" profile containing sensible base settings.
-    
+
     Args:
         path: Path to config.toml file
-    
+
     Example:
         >>> ensure_config_exists()
         >>> # ~/.config/bbl-shutter-cam/config.toml now exists
@@ -60,12 +60,12 @@ def ensure_config_exists(path: Path = DEFAULT_CONFIG_PATH) -> None:
     cfg["profiles"] = document()
 
     # Minimal default profile
-    cfg["profiles"]["default"] = document()
-    cfg["profiles"]["default"]["device"] = {
+    cfg["profiles"]["default"] = document()  # type: ignore[index]
+    cfg["profiles"]["default"]["device"] = {  # type: ignore[index]
         "name": "BBL_SHUTTER",
         # mac and notify_uuid learned during setup
     }
-    cfg["profiles"]["default"]["camera"] = {
+    cfg["profiles"]["default"]["camera"] = {  # type: ignore[index]
         "output_dir": str(Path.home() / "captures" / "default"),
         "filename_format": "%Y%m%d_%H%M%S.jpg",
         "min_interval_sec": 0.5,
@@ -81,16 +81,16 @@ def ensure_config_exists(path: Path = DEFAULT_CONFIG_PATH) -> None:
 
 def load_config(path: Path = DEFAULT_CONFIG_PATH) -> Dict[str, Any]:
     """Load and parse the entire TOML configuration file.
-    
+
     Args:
         path: Path to config.toml file
-    
+
     Returns:
         Dict-like structure representing the parsed TOML
-    
+
     Raises:
         FileNotFoundError: If config file doesn't exist
-    
+
     Example:
         >>> cfg = load_config()
         >>> profiles = cfg.get("profiles", {})
@@ -104,13 +104,13 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> Dict[str, Any]:
 
 def save_config(cfg: Dict[str, Any], path: Path = DEFAULT_CONFIG_PATH) -> None:
     """Write configuration back to disk.
-    
+
     Creates parent directories if needed. Uses TOML formatting.
-    
+
     Args:
         cfg: Configuration dictionary to save
         path: Path to write config.toml file to
-    
+
     Example:
         >>> cfg = load_config()
         >>> cfg["profiles"]["new_printer"] = {...}
@@ -122,24 +122,27 @@ def save_config(cfg: Dict[str, Any], path: Path = DEFAULT_CONFIG_PATH) -> None:
 
 def load_profile(path: Path, profile_name: str | None) -> Dict[str, Any]:
     """Load a single named profile from the configuration file.
-    
+
     Resolves default_profile if profile_name is None. Normalizes the returned
     dict to ensure expected sections (device, camera, camera.rpicam) exist.
-    
+
     Args:
         path: Path to config.toml file
         profile_name: Name of profile to load (e.g., "office"). If None, uses
                      default_profile from config
-    
+
     Returns:
         Dict: Profile configuration with normalized structure and "_profile_name" key
-    
+
     Raises:
         FileNotFoundError: If config file doesn't exist
         KeyError: If profile_name is not found or default_profile not set
-    
+
     Example:
-        >>> prof = load_profile(Path.home() / ".config" / "bbl-shutter-cam" / "config.toml", "office")
+        >>> prof = load_profile(
+        ...     Path.home() / ".config" / "bbl-shutter-cam" / "config.toml",
+        ...     "office",
+        ... )
         >>> mac = prof["device"]["mac"]
         >>> width = prof["camera"]["rpicam"]["width"]
     """
@@ -167,26 +170,26 @@ def load_profile(path: Path, profile_name: str | None) -> Dict[str, Any]:
     # Attach resolved name for convenience
     prof["_profile_name"] = profile_name
 
-    return prof
+    return prof  # type: ignore[no-any-return]
 
 
 def get_trigger_events(profile: Dict[str, Any]) -> list[Dict[str, Any]]:
     """Get trigger event definitions from a profile.
-    
+
     Retrieves configured trigger signals that should cause photo capture.
     If no events are explicitly configured, returns hardware defaults for
     backward compatibility (manual button press and Bambu Studio triggers).
-    
+
     Args:
         profile: Profile dict (from load_profile())
-    
+
     Returns:
         List of event dicts, each containing:
             - hex: Hex string (e.g., "4000")
             - capture: Bool, whether to capture on this event
             - name: Optional event name (e.g., "manual_button")
             - uuid: Characteristic UUID that generated the signal
-    
+
     Example:
         >>> prof = load_profile(path, "office")
         >>> events = get_trigger_events(prof)
@@ -201,26 +204,41 @@ def get_trigger_events(profile: Dict[str, Any]) -> list[Dict[str, Any]]:
     if not events:
         # Default trigger signals for BBL_SHUTTER / Bambu devices
         return [
-            {"uuid": "00002a4d-0000-1000-8000-00805f9b34fb", "hex": "4000", "capture": True, "name": "manual_button"},
-            {"uuid": "00002a4d-0000-1000-8000-00805f9b34fb", "hex": "8000", "capture": True, "name": "bambu_studio"},
-            {"uuid": "00002a4d-0000-1000-8000-00805f9b34fb", "hex": "0000", "capture": False, "name": "release"},
+            {
+                "uuid": "00002a4d-0000-1000-8000-00805f9b34fb",
+                "hex": "4000",
+                "capture": True,
+                "name": "manual_button",
+            },
+            {
+                "uuid": "00002a4d-0000-1000-8000-00805f9b34fb",
+                "hex": "8000",
+                "capture": True,
+                "name": "bambu_studio",
+            },
+            {
+                "uuid": "00002a4d-0000-1000-8000-00805f9b34fb",
+                "hex": "0000",
+                "capture": False,
+                "name": "release",
+            },
         ]
 
-    return events
+    return events  # type: ignore[no-any-return]
 
 
 def get_event_trigger_bytes(profile: Dict[str, Any]) -> list[bytes]:
     """Get all configured trigger byte sequences that should capture photos.
-    
+
     Extracts and converts hex-string trigger events to bytes. Skips any events
     that don't have capture=True or have invalid hex format.
-    
+
     Args:
         profile: Profile dict (from load_profile())
-    
+
     Returns:
         List of bytes objects (e.g., [b"@\x00", b"\x80\x00"])
-    
+
     Example:
         >>> prof = load_profile(path, "office")
         >>> triggers = get_event_trigger_bytes(prof)
@@ -241,7 +259,6 @@ def get_event_trigger_bytes(profile: Dict[str, Any]) -> list[bytes]:
     return triggers
 
 
-
 def update_profile_device_fields(
     path: Path,
     profile_name: str,
@@ -249,16 +266,16 @@ def update_profile_device_fields(
     notify_uuid: str,
 ) -> None:
     """Update or create device pairing information for a profile.
-    
+
     Stores the device MAC address and notify characteristic UUID in the
     profile. Also sets this profile as the default_profile.
-    
+
     Args:
         path: Path to config.toml file
         profile_name: Name of profile to update (created if new)
         mac: Device MAC address (e.g., "AA:BB:CC:DD:EE:FF")
         notify_uuid: UUID of the characteristic that sends shutter signals
-    
+
     Example:
         >>> update_profile_device_fields(
         ...     Path.home() / ".config/bbl-shutter-cam/config.toml",

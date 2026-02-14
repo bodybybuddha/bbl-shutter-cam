@@ -4,8 +4,10 @@ Use a **Bambu Lab CyberBrick / BBL_SHUTTER Bluetooth shutter** to trigger photos
 
 **Perfect for:** Headless, reliable time-lapse capture inside 3D printer enclosures with support for multiple printers/cameras through profile-based configuration.
 
-![Status Badge](https://img.shields.io/badge/Status-Alpha-orange)
+![Status Badge](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-green)
+[![Lint](https://github.com/bodybybuddha/bbl-shutter-cam/actions/workflows/lint.yml/badge.svg)](https://github.com/bodybybuddha/bbl-shutter-cam/actions/workflows/lint.yml)
+[![Test](https://github.com/bodybybuddha/bbl-shutter-cam/actions/workflows/test.yml/badge.svg)](https://github.com/bodybybuddha/bbl-shutter-cam/actions/workflows/test.yml)
 [![GitHub Release](https://img.shields.io/github/release/bodybybuddha/bbl-shutter-cam.svg?style=flat)](https://github.com/bodybybuddha/bbl-shutter-cam/releases)
 
 ---
@@ -39,8 +41,11 @@ sudo apt update && sudo apt install -y \
 ```bash
 # Download from GitHub Releases:
 # https://github.com/bodybybuddha/bbl-shutter-cam/releases
-chmod +x bbl-shutter-cam
-./bbl-shutter-cam --help
+# Choose the correct Pi binary:
+# - bbl-shutter-cam-<version>-linux-arm64
+# - bbl-shutter-cam-<version>-linux-armv7
+chmod +x bbl-shutter-cam-<version>-linux-arm64
+./bbl-shutter-cam-<version>-linux-arm64 --help
 ```
 
 **Option B: From Source**
@@ -176,13 +181,12 @@ python -m pytest tests/ -v          # Run tests
 
 **License:** MIT (see [LICENSE](LICENSE))
 
-**Status:** Alpha - actively developed
+**Status:** Stable - v1.0.0 release
 
 **Roadmap:** See [ROADMAP.md](ROADMAP.md) for planned features:
-- Camera calibration mode
 - Web-based UI
 - Multi-camera support
-- Unit tests & CI/CD
+- Hardware detection
 
 ---
 
