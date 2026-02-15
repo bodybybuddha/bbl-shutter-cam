@@ -25,5 +25,11 @@ These instructions define how automated agents should work in this repository.
 ## Repo conventions
 
 - Preserve public CLI behavior unless the change explicitly requires otherwise.
-- Keep documentation in sync with behavior changes when needed.
+- Documentation must stay in sync with behavior changes.
+- If a change affects features/functionality/user workflows/configuration/CLI output, update the relevant docs *in the same PR* before merging into `dev`:
+  - `CHANGELOG.md`
+  - `ROADMAP.md` (if it impacts planned work or milestones)
+  - `README.md`
+  - anything under `docs/`
+- Do not merge changes into `dev` without the documentation updates for that change.
 - Prefer editing existing files over adding new ones unless required.
