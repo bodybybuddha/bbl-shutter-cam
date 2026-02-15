@@ -3,6 +3,12 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and upload assets for (e.g., v1.0.0)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -10,6 +16,8 @@ permissions:
 jobs:
   build-linux-arm:
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.event_name == 'release' && github.ref_name || inputs.tag }}
     strategy:
       fail-fast: false
       matrix:
@@ -23,20 +31,23 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VERSION }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Build PyInstaller binary
-        env:
-          VERSION: ${{ github.ref_name }}
-          SUFFIX: ${{ matrix.suffix }}
         run: |
           docker run --rm --platform ${{ matrix.platform }} \
+            --user $(id -u):$(id -g) \
+            -e HOME=/tmp \
             -v "$GITHUB_WORKSPACE:/workspace" \
             -w /workspace \
             python:3.11-bullseye \
-            bash -lc "python -m pip install --upgrade pip && \
+            bash -lc "python -m venv /tmp/venv && \
+              . /tmp/venv/bin/activate && \
+              python -m pip install --upgrade pip && \
               pip install -e .[dev] && \
               python -m PyInstaller \
                 --onefile \
@@ -47,15 +58,12 @@ jobs:
                 --hidden-import=tomlkit \
                 src/bbl_shutter_cam/cli.py"
 
-      - name: Fix permissions and rename binary
-        env:
-          VERSION: ${{ github.ref_name }}
-          SUFFIX: ${{ matrix.suffix }}
+      - name: Rename binary
         run: |
-          sudo chown -R $USER:$USER dist
-          mv dist/bbl-shutter-cam dist/bbl-shutter-cam-${VERSION}-${SUFFIX}
+          mv dist/bbl-shutter-cam dist/bbl-shutter-cam-${VERSION}-${{ matrix.suffix }}
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/bbl-shutter-cam-${{ github.ref_name }}-${{ matrix.suffix }}
+          tag_name: ${{ env.VERSION }}
+          files: dist/bbl-shutter-cam-${{ env.VERSION }}-${{ matrix.suffix }}
