@@ -12,7 +12,10 @@ from bbl_shutter_cam.util import (
     LogLevel,
     Logger,
     configure_logging,
+    ensure_dir,
     expand_path,
+    fmt_kv,
+    safe_get,
 )
 
 
@@ -306,3 +309,129 @@ class TestExpandPath:
         result = expand_path("~/test")
 
         assert isinstance(result, Path)
+
+
+class TestEnsureDir:
+    """Test ensure_dir() function."""
+
+    def test_creates_directory(self, tmp_path):
+        """Should create directory if it doesn't exist."""
+        test_dir = tmp_path / "new_directory"
+        assert not test_dir.exists()
+
+        result = ensure_dir(test_dir)
+
+        assert test_dir.exists()
+        assert test_dir.is_dir()
+        assert result == test_dir
+
+    def test_creates_nested_directories(self, tmp_path):
+        """Should create parent directories as needed."""
+        test_dir = tmp_path / "parent" / "child" / "grandchild"
+        assert not test_dir.exists()
+
+        result = ensure_dir(test_dir)
+
+        assert test_dir.exists()
+        assert test_dir.is_dir()
+        assert result == test_dir
+
+    def test_expands_tilde(self, tmp_path, monkeypatch):
+        """Should expand ~ in path."""
+        monkeypatch.setenv("HOME", str(tmp_path))
+        test_dir = "~/test_dir"
+
+        result = ensure_dir(test_dir)
+
+        assert "~" not in str(result)
+        assert result.exists()
+
+    def test_handles_existing_directory(self, tmp_path):
+        """Should handle already existing directory without error."""
+        test_dir = tmp_path / "existing"
+        test_dir.mkdir()
+
+        result = ensure_dir(test_dir)
+
+        assert test_dir.exists()
+        assert result == test_dir
+
+
+class TestSafeGet:
+    """Test safe_get() function."""
+
+    def test_retrieves_nested_value(self):
+        """Should retrieve deeply nested dictionary values."""
+        data = {"level1": {"level2": {"level3": "value"}}}
+
+        result = safe_get(data, ["level1", "level2", "level3"])
+
+        assert result == "value"
+
+    def test_returns_default_on_missing_key(self):
+        """Should return default when key doesn't exist."""
+        data = {"level1": {"level2": "value"}}
+
+        result = safe_get(data, ["level1", "missing"], default="default")
+
+        assert result == "default"
+
+    def test_returns_none_as_default_default(self):
+        """Should return None by default when key is missing."""
+        data = {"level1": {}}
+
+        result = safe_get(data, ["level1", "missing"])
+
+        assert result is None
+
+    def test_handles_non_dict_in_path(self):
+        """Should return default if encountering non-dict mid-traversal."""
+        data = {"level1": "string_value"}
+
+        result = safe_get(data, ["level1", "level2"], default="fallback")
+
+        assert result == "fallback"
+
+    def test_handles_empty_keys(self):
+        """Should return original dict when keys list is empty."""
+        data = {"key": "value"}
+
+        result = safe_get(data, [])
+
+        assert result == data
+
+    def test_supports_custom_default(self):
+        """Should support various default value types."""
+        data = {"exists": True}
+
+        result = safe_get(data, ["missing"], default=42)
+
+        assert result == 42
+
+
+class TestFmtKv:
+    """Test fmt_kv() function."""
+
+    def test_formats_key_value_pair(self):
+        """Should format key-value pair with colon separator."""
+        result = fmt_kv("Status", "Connected")
+
+        assert result == "Status: Connected"
+
+    def test_handles_none_value(self):
+        """Should format None as empty string."""
+        result = fmt_kv("Optional", None)
+
+        assert result == "Optional: "
+
+    def test_handles_numeric_values(self):
+        """Should format numeric values correctly."""
+        result = fmt_kv("Count", 42)
+
+        assert result == "Count: 42"
+
+    def test_handles_empty_string_value(self):
+        """Should distinguish between None and empty string."""
+        result = fmt_kv("Empty", "")
+
+        assert result == "Empty: "

@@ -135,6 +135,21 @@ def _cmd_scan(args: argparse.Namespace) -> int:
     devices = asyncio.run(discover.scan(name_filter=args.name, timeout=args.timeout))
 
     if not devices:
+        if args.name:
+            paired = discover.find_paired_device(args.name)
+            if paired:
+                LOG.warning("No BLE devices found (or none matching).")
+                LOG.info(
+                    "Device %r is already paired at %s.",
+                    paired["name"],
+                    paired["mac"],
+                )
+                LOG.info(
+                    "Paired devices may not advertise while sleeping. Press the shutter to wake it,"
+                )
+                LOG.info("or run setup with --mac %s.", paired["mac"])
+                return 1
+
         LOG.warning("No BLE devices found (or none matching).")
         return 1
 

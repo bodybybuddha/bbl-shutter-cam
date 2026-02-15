@@ -27,23 +27,18 @@ if ! python3 -m pip show pyinstaller > /dev/null 2>&1; then
     python3 -m pip install -e ".[dev]"
 fi
 
+# Move to workspace root (script is in scripts/)
+cd "$SCRIPT_DIR/.."
+
 # Clean old builds
 if [ -d "dist" ]; then
     echo "🧹 Cleaning old build files..."
     rm -rf dist/ build/
 fi
 
-# Build executable
+# Build executable using the .spec file (same as release workflow)
 echo "🔨 Building executable..."
-python3 -m PyInstaller \
-    --onefile \
-    --console \
-    --name bbl-shutter-cam \
-    --paths src \
-    --add-data src/bbl_shutter_cam:bbl_shutter_cam \
-    --hidden-import=bleak \
-    --hidden-import=tomlkit \
-    scripts/pyinstaller_entry.py
+python3 -m PyInstaller --clean --noconfirm bbl-shutter-cam.spec
 
 echo ""
 echo "✅ Build complete!"

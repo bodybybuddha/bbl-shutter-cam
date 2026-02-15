@@ -104,6 +104,7 @@ config.toml
 output/
 captures/
 photos/
+binarytesting/
 
 # Jekyll (GitHub Pages)
 _site/
