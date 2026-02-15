@@ -36,7 +36,7 @@ dev = [
   "pytest>=7.0,<9",
   "pytest-cov>=4.0,<8",
   "black>=23.0,<26",
-  "pylint>=2.17,<3",
+  "pylint>=3.0,<4",
   "mypy>=1.0,<2",
   "pyinstaller>=6.0,<7",
 ]
@@ -80,7 +80,9 @@ disable = [
   "C0209",  # consider-using-f-string
   "C0301",  # line-too-long
   "C0415",  # import-outside-toplevel
+  "E1121",  # too-many-function-args (false positive for logging methods)
   "R0913",  # too-many-arguments
+  "R0917",  # too-many-positional-arguments (new in pylint 3.x)
   "R0902",  # too-many-instance-attributes
   "R0912",  # too-many-branches
   "R0914",  # too-many-locals
