@@ -45,7 +45,14 @@ sudo apt update && sudo apt install -y \
 # - bbl-shutter-cam-<version>-linux-arm64
 # - bbl-shutter-cam-<version>-linux-armv7
 chmod +x bbl-shutter-cam-<version>-linux-arm64
-./bbl-shutter-cam-<version>-linux-arm64 --help
+sudo mv bbl-shutter-cam-<version>-linux-arm64 /usr/local/bin/bbl-shutter-cam
+bbl-shutter-cam --help
+
+# No-sudo alternative:
+# mkdir -p ~/.local/bin
+# mv bbl-shutter-cam-<version>-linux-arm64 ~/.local/bin/bbl-shutter-cam
+# export PATH="$HOME/.local/bin:$PATH"
+# bbl-shutter-cam --help
 ```
 
 **Option B: From Source**
@@ -69,6 +76,9 @@ sudo bluetoothctl
 # pair AA:BB:CC:DD:EE:FF
 # trust AA:BB:CC:DD:EE:FF
 # quit
+
+# Note: paired shutters may sleep and not appear in scans.
+# Press the shutter button to wake it before scanning or setup.
 ```
 
 ### 4. Configure & Run
@@ -194,7 +204,6 @@ python -m pytest tests/ -v          # Run tests
 
 - **Repository:** https://github.com/bodybybuddha/bbl-shutter-cam
 - **Issues & Bugs:** [GitHub Issues](https://github.com/bodybybuddha/bbl-shutter-cam/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/bodybybuddha/bbl-shutter-cam/discussions)
 
 ---
 

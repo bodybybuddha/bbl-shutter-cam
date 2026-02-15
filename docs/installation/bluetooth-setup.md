@@ -134,6 +134,9 @@ Discovery started
 
 Note the MAC address (e.g., `AA:BB:CC:DD:EE:FF`).
 
+Note: Once paired, the shutter may sleep and stop advertising. If it does not
+show up in scans, press the shutter button to wake it and retry.
+
 ---
 
 ## Step 5: Pair the Device
@@ -267,6 +270,15 @@ You should see `Paired: yes` and `Trusted: yes`.
 - Check battery level: `bluetoothctl show`
 - Increase `reconnect_delay` in configuration if needed (default: 2 seconds)
 - Ensure Pi Bluetooth antenna is properly seated
+- If you see rapid connect/disconnect loops in `bluetoothctl`, the pairing may be corrupted:
+  ```bash
+  bluetoothctl
+  remove AA:BB:CC:DD:EE:FF
+  scan on
+  # Press shutter button multiple times
+  pair AA:BB:CC:DD:EE:FF
+  trust AA:BB:CC:DD:EE:FF
+  ```
 
 ---
 

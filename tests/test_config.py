@@ -16,6 +16,7 @@ from bbl_shutter_cam.config import (
     load_config,
     load_profile,
     save_config,
+    update_profile_device_fields,
 )
 
 
@@ -355,3 +356,81 @@ class TestGetEventTriggerBytes:
         assert len(result) == 2
         assert b"\x40\x00" in result
         assert b"\x80\x00" in result
+
+
+class TestUpdateProfileDeviceFields:
+    """Test update_profile_device_fields() function."""
+
+    def test_creates_profile_if_missing(self, tmp_path):
+        """Should create new profile with device fields if it doesn't exist."""
+        config_path = tmp_path / "config.toml"
+        ensure_config_exists(config_path)
+
+        update_profile_device_fields(
+            config_path,
+            "new_profile",
+            "AA:BB:CC:DD:EE:FF",
+            "00002a4d-0000-1000-8000-00805f9b34fb",
+        )
+
+        cfg = load_config(config_path)
+        assert "new_profile" in cfg["profiles"]
+        assert cfg["profiles"]["new_profile"]["device"]["mac"] == "AA:BB:CC:DD:EE:FF"
+        assert (
+            cfg["profiles"]["new_profile"]["device"]["notify_uuid"]
+            == "00002a4d-0000-1000-8000-00805f9b34fb"
+        )
+
+    def test_updates_existing_profile(self, tmp_path):
+        """Should update device fields in existing profile."""
+        config_path = tmp_path / "config.toml"
+        ensure_config_exists(config_path)
+
+        # Update the default profile
+        update_profile_device_fields(
+            config_path,
+            "default",
+            "11:22:33:44:55:66",
+            "0000aaaa-0000-1000-8000-00805f9b34fb",
+        )
+
+        cfg = load_config(config_path)
+        assert cfg["profiles"]["default"]["device"]["mac"] == "11:22:33:44:55:66"
+        assert (
+            cfg["profiles"]["default"]["device"]["notify_uuid"]
+            == "0000aaaa-0000-1000-8000-00805f9b34fb"
+        )
+
+    def test_sets_as_default_profile(self, tmp_path):
+        """Should set the updated profile as default."""
+        config_path = tmp_path / "config.toml"
+        ensure_config_exists(config_path)
+
+        update_profile_device_fields(
+            config_path, "office", "AA:BB:CC:DD:EE:FF", "00002a4d-0000-1000-8000-00805f9b34fb"
+        )
+
+        cfg = load_config(config_path)
+        assert cfg["default_profile"] == "office"
+
+    def test_preserves_other_settings(self, tmp_path):
+        """Should preserve other profile settings when updating device fields."""
+        config_path = tmp_path / "config.toml"
+        ensure_config_exists(config_path)
+        cfg = load_config(config_path)
+        # Add custom camera settings
+        cfg["profiles"]["default"]["camera"]["rpicam"]["width"] = 3840
+        save_config(cfg, config_path)
+
+        update_profile_device_fields(
+            config_path,
+            "default",
+            "AA:BB:CC:DD:EE:FF",
+            "00002a4d-0000-1000-8000-00805f9b34fb",
+        )
+
+        cfg = load_config(config_path)
+        # Camera settings should be preserved
+        assert cfg["profiles"]["default"]["camera"]["rpicam"]["width"] == 3840
+        # Device fields should be updated
+        assert cfg["profiles"]["default"]["device"]["mac"] == "AA:BB:CC:DD:EE:FF"

@@ -33,10 +33,28 @@ cat ~/.config/bbl-shutter-cam/config.toml
 
 **Hanging at "Connecting…"**
 
-Likely CyberBrick is off or out of range. Check:
+Likely CyberBrick is asleep, off, or out of range. Try:
 ```bash
-sudo hcitool scan
+bluetoothctl devices | grep BBL_SHUTTER
 ```
+If it is paired but not found in scans, press the shutter button to wake it and
+retry `setup` or `run --dry-run`.
+
+**Rapid connect/disconnect loop**
+
+If `bluetoothctl` shows the device repeatedly connecting and disconnecting, the pairing may be corrupted. Remove and re-pair:
+
+```bash
+bluetoothctl
+remove B8:F8:62:A9:92:7E  # Use your device's MAC
+scan on
+# Press the shutter button multiple times
+pair B8:F8:62:A9:92:7E
+trust B8:F8:62:A9:92:7E
+exit
+```
+
+Then retry `setup` or `run --dry-run`.
 
 ### Photo Capture Issues
 

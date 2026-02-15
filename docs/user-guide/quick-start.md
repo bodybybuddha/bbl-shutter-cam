@@ -61,7 +61,11 @@ pip install -e "."
 rpicam-still -o test.jpg && rm test.jpg && echo "✅ Camera OK"
 
 # Test Bluetooth
-sudo hcitool scan | grep BBL_SHUTTER && echo "✅ Bluetooth OK"
+# If the shutter is already paired, it may not appear in scans while sleeping.
+bluetoothctl devices | grep BBL_SHUTTER && echo "✅ Bluetooth paired"
+# If not paired yet, scan and press the shutter to wake it.
+# bluetoothctl
+# scan on
 ```
 
 Both should work!

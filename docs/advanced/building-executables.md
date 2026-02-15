@@ -140,3 +140,69 @@ codesign --deep --force --verify --verbose --sign - dist/bbl-shutter-cam
 - **Executable is standalone** - no Python installation needed by end users
 - **Binary size**: Each executable is ~50-100MB (includes Python runtime)
 - **macOS executable**: This is a regular CLI executable, not a `.app` bundle
+---
+
+## Testing Locally Before Release
+
+To test the binary thoroughly before publishing a release:
+
+### Using VS Code Tasks
+
+1. **Build**: Press `Ctrl+Shift+B` (or `Cmd+Shift+B` on Mac) and select "Build executable"
+2. **Test**: Run task "Test local binary" to verify it launches
+3. **Build and test**: Run task "Build and test binary" to do both in sequence
+
+### Manual Testing Workflow
+
+```bash
+# 1. Build the executable
+./scripts/build.sh
+
+# 2. Quick smoke test
+./dist/bbl-shutter-cam --help
+
+# 3. Test with a real config (dry-run)
+sudo ./dist/bbl-shutter-cam --config ~/.config/bbl-shutter-cam/config.toml \
+  run --profile your-profile --dry-run --verbose
+
+# 4. Test scan functionality
+sudo ./dist/bbl-shutter-cam scan --name BBL_SHUTTER --timeout 10
+
+# 5. Full integration test (optional)
+# Create a test directory with a test config
+mkdir -p binarytesting
+cp ~/.config/bbl-shutter-cam/config.toml binarytesting/
+sudo ./dist/bbl-shutter-cam --config binarytesting/config.toml \
+  run --profile your-profile --dry-run --verbose
+```
+
+### Pre-Release Checklist
+
+Before tagging a release:
+
+- [ ] Binary builds without errors
+- [ ] `--help` displays correctly
+- [ ] `scan` command works
+- [ ] `run --dry-run` connects and receives shutter signals
+- [ ] Config parsing works (no errors on valid config)
+- [ ] All quality gates pass (tests, lint, type check)
+- [ ] Documentation is up to date
+- [ ] `CHANGELOG.md` updated with release notes
+
+### Comparing with Released Binaries
+
+To compare your local build with a GitHub release:
+
+```bash
+# Download release binary
+curl -L -o bbl-shutter-cam-release \
+  https://github.com/bodybybuddha/bbl-shutter-cam/releases/download/v1.0.1/bbl-shutter-cam-v1.0.1-linux-arm64
+
+# Compare file sizes
+ls -lh dist/bbl-shutter-cam bbl-shutter-cam-release
+
+# Test both
+chmod +x bbl-shutter-cam-release
+./bbl-shutter-cam-release --help
+./dist/bbl-shutter-cam --help
+```
