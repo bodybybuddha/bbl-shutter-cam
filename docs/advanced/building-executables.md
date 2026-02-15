@@ -140,3 +140,92 @@ codesign --deep --force --verify --verbose --sign - dist/bbl-shutter-cam
 - **Executable is standalone** - no Python installation needed by end users
 - **Binary size**: Each executable is ~50-100MB (includes Python runtime)
 - **macOS executable**: This is a regular CLI executable, not a `.app` bundle
+---
+
+## Testing Locally Before Release
+
+To test the binary thoroughly before publishing a release:
+
+### Using VS Code Tasks
+
+1. **Build**: Press `Ctrl+Shift+B` (or `Cmd+Shift+B` on Mac) and select "Build executable"
+2. **Test**: Run task "Test local binary" to verify it launches
+3. **Build and test**: Run task "Build and test binary" to do both in sequence
+
+### Manual Testing Workflow
+
+```bash
+# 1. Build the executable
+./scripts/build.sh
+
+# 2. Quick smoke test
+./dist/bbl-shutter-cam --help
+
+# 3. Test with a real config (dry-run)
+sudo ./dist/bbl-shutter-cam --config ~/.config/bbl-shutter-cam/config.toml \
+  run --profile your-profile --dry-run --verbose
+
+# 4. Test scan functionality
+sudo ./dist/bbl-shutter-cam scan --name BBL_SHUTTER --timeout 10
+
+# 5. Full integration test (optional)
+# Create a test directory with a test config
+mkdir -p binarytesting
+cp ~/.config/bbl-shutter-cam/config.toml binarytesting/
+sudo ./dist/bbl-shutter-cam --config binarytesting/config.toml \
+  run --profile your-profile --dry-run --verbose
+```
+
+### Pre-Release Checklist
+
+Before tagging a release:
+
+- [ ] Binary builds without errors
+- [ ] `--help` displays correctly
+- [ ] `scan` command works
+- [ ] `run --dry-run` connects and receives shutter signals
+- [ ] Config parsing works (no errors on valid config)
+- [ ] All quality gates pass (tests, lint, type check)
+- [ ] Documentation is up to date
+- [ ] `CHANGELOG.md` updated with release notes
+
+### Comparing with Released Binaries
+
+To compare your local build with a GitHub release:
+
+```bash
+# Download release binary
+curl -L -o bbl-shutter-cam-release \
+  https://github.com/bodybybuddha/bbl-shutter-cam/releases/download/v1.0.1/bbl-shutter-cam-v1.0.1-linux-arm64
+
+# Compare file sizes
+ls -lh dist/bbl-shutter-cam bbl-shutter-cam-release
+
+# Test both
+chmod +x bbl-shutter-cam-release
+./bbl-shutter-cam-release --help
+./dist/bbl-shutter-cam --help
+```
+
+---
+
+## Publishing Releases
+
+For maintainers creating official releases, see the [Release Process](../../CONTRIBUTING.md#release-process) in CONTRIBUTING.md.
+
+### Quick Reference
+
+1. **Test locally** using the checklist above
+2. **Create release branch** from `dev`
+3. **Update** CHANGELOG.md, ROADMAP.md, docs
+4. **Merge PR** to `dev`
+5. **Tag release**: `git tag -a v1.0.3 -m "..."`
+6. **Push tag**: `git push origin refs/tags/v1.0.3`
+7. **Create GitHub Release**: https://github.com/bodybybuddha/bbl-shutter-cam/releases/new
+   - Select the tag you just pushed
+   - Add release notes
+   - **Click "Publish release"** (this triggers the build workflow)
+8. **Wait for binaries**: GitHub Actions builds and uploads ARM binaries (~5-10 min)
+9. **Verify release**: Download and test a binary
+
+> **Important**: The automated build workflow only triggers when you **publish** a GitHub Release, not when you push a tag. Publishing the release will automatically build and upload the Linux ARM64 and ARMv7 binaries.

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import subprocess
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from bleak import BleakScanner
 
@@ -58,6 +58,39 @@ async def scan(name_filter: Optional[str] = None, timeout: float = 8.0):
 
     LOG.debug(f"BLE scan done: {len(hits)} matching device(s) found")
     return hits
+
+
+def find_paired_device(name: str) -> Optional[Dict[str, str]]:
+    """Find a paired device by name using bluetoothctl.
+
+    Args:
+        name: Device name to match (exact match).
+
+    Returns:
+        Dict with keys: mac, name if found, otherwise None.
+    """
+    try:
+        result = subprocess.run(
+            ["bluetoothctl", "devices"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if not line.startswith("Device "):
+            continue
+        parts = line.split(" ", 2)
+        if len(parts) != 3:
+            continue
+        _, mac, dev_name = parts
+        if dev_name.strip() == name:
+            return {"mac": mac, "name": dev_name.strip()}
+
+    return None
 
 
 async def learn_notify_uuid(mac: str, press_timeout: float = 30.0, verbose: bool = False) -> str:
