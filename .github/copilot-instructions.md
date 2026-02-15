@@ -35,4 +35,5 @@ These instructions define how automated agents should work in this repository.
 - If a change modifies what is stored in the config file (new keys, changed defaults, renamed/removed settings, profile structure), update the examples in the same PR:
   - `examples/config.example`
   - `examples/config.minimal.toml`
+- Use Semantic Versioning (SemVer) in release notes/changelog updates: `MAJOR.MINOR.PATCH` (breaking/features/bugfixes).
 - Prefer editing existing files over adding new ones unless required.

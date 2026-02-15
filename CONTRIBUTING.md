@@ -12,6 +12,7 @@ Thank you for your interest in contributing to this project! This guide covers s
 - [Running Tasks](#running-tasks)
 - [Code Style](#code-style)
 - [Testing](#testing)
+- [Versioning](#versioning)
 - [Submitting Changes](#submitting-changes)
 
 ---
@@ -190,6 +191,22 @@ When using VSCode:
 ## Testing
 
 Tests are located in the `tests/` directory and use **pytest**.
+
+---
+
+## Versioning
+
+This project uses **Semantic Versioning (SemVer)**: `MAJOR.MINOR.PATCH`.
+
+- **PATCH** (the last number) for bug fixes and small internal changes that do not change user-facing behavior.
+- **MINOR** (the middle number) for new features and backwards-compatible behavior changes.
+- **MAJOR** (the first number) for changes that may be breaking (config changes, CLI changes, behavior changes that can affect existing setups).
+
+Examples:
+
+- `1.0.1`: bug fix release
+- `1.1.0`: new feature(s) added without breaking existing usage
+- `2.0.0`: breaking change release
 
 ### Run All Tests
 
