@@ -218,6 +218,165 @@ When a change may break existing setups (CLI flags, config structure/keys/defaul
 
 ---
 
+## Release Process
+
+This section describes how to create and publish a new release.
+
+### Prerequisites
+
+Before creating a release:
+
+1. **All changes merged to `dev`**: Ensure your release branch PR is merged
+2. **Quality gates pass**: All tests, lint, type checks passing
+3. **Documentation updated**: CHANGELOG.md, ROADMAP.md, README.md, docs/
+4. **Local testing complete**: Binary built and tested (see [Building Executables](docs/advanced/building-executables.md#testing-locally-before-release))
+
+### Step 1: Create Release Branch
+
+```bash
+# From dev branch
+git checkout dev
+git pull origin dev
+
+# Create release branch
+git checkout -b v1.0.3
+
+# Update dependencies (if needed)
+pip install -e ".[dev]" --upgrade
+
+# Build and test locally
+./scripts/build.sh
+python -m pytest tests/ -v
+./dist/bbl-shutter-cam --help
+```
+
+### Step 2: Update Version-Related Files
+
+Update version strings and documentation:
+
+1. **CHANGELOG.md**: Add release notes for this version
+2. **ROADMAP.md**: Mark completed features, update milestones
+3. **README.md**: Update version numbers if referenced
+4. **pyproject.toml**: Update version number (if using dynamic versioning)
+5. **docs/**: Update any version-specific documentation
+
+### Step 3: Commit and Push
+
+```bash
+# Stage all changes
+git add -A
+
+# Commit with descriptive message
+git commit -m "chore: prepare v1.0.3 release
+
+- Update dependencies
+- Update documentation
+- Update CHANGELOG.md"
+
+# Push to remote
+git push -u origin v1.0.3
+```
+
+### Step 4: Create Pull Request
+
+```bash
+# Create PR from v1.0.3 -> dev
+# Via GitHub UI or CLI:
+gh pr create --base dev --head v1.0.3 \
+  --title "Release v1.0.3: Brief description" \
+  --body "Release notes summary"
+
+# Wait for CI checks to pass
+# Review and merge the PR
+```
+
+### Step 5: Tag the Release
+
+After the PR is merged to `dev`:
+
+```bash
+# Switch to dev and pull the merged changes
+git checkout dev
+git pull origin dev
+
+# Create annotated tag
+git tag -a v1.0.3 -m "Release v1.0.3
+
+Brief description of this release.
+
+Key improvements:
+- Feature 1
+- Feature 2
+- Bug fix 3"
+
+# Push the tag
+git push origin refs/tags/v1.0.3
+```
+
+### Step 6: Create GitHub Release
+
+The tag alone won't trigger the build workflow. You must publish a GitHub Release:
+
+1. **Go to GitHub Releases**: https://github.com/bodybybuddha/bbl-shutter-cam/releases
+2. **Click "Draft a new release"**
+3. **Choose the tag**: Select `v1.0.3` from the dropdown
+4. **Add release title**: `v1.0.3 - Brief Description`
+5. **Add release notes**: Copy/paste from CHANGELOG.md and format nicely
+6. **Mark as pre-release** (optional): Check if this is a pre-release
+7. **Click "Publish release"**
+
+**This triggers the GitHub Actions workflow** which will:
+- Build binaries for Linux ARM64 and ARMv7
+- Upload binaries as release assets automatically
+- Complete in ~5-10 minutes
+
+### Step 7: Verify Release
+
+After the workflow completes:
+
+1. **Download a binary**: Test one of the uploaded artifacts
+2. **Verify it works**: Run `--help`, test basic functionality
+3. **Check release notes**: Ensure they're formatted correctly
+4. **Update documentation** (if needed): Fix any issues found
+
+### Step 8: Merge to Main (Optional)
+
+For stable releases, merge `dev` → `main`:
+
+```bash
+# Create PR: dev -> main
+gh pr create --base main --head dev \
+  --title "Release v1.0.3" \
+  --body "Merge stable release to main"
+
+# Review and merge
+```
+
+### Troubleshooting Releases
+
+**Workflow didn't trigger?**
+- The workflow triggers on `release: types: [published]`, not on tag push
+- You must create and publish the GitHub Release (Step 6)
+- You can manually trigger via Actions tab → Release → Run workflow
+
+**Need to rebuild a release?**
+- Go to Actions → Release workflow → Run workflow
+- Enter the tag name (e.g., `v1.0.3`)
+- Binaries will be uploaded to the existing release
+
+**Tag already exists?**
+```bash
+# Delete the tag locally and remotely
+git tag -d v1.0.3
+git push origin :refs/tags/v1.0.3
+
+# Recreate and push
+git tag -a v1.0.3 -m "..."
+git push origin refs/tags/v1.0.3
+```
+
+---
+
 ## Maintainer Notes (Repo Policy)
 
 These are typically enforced via GitHub branch protection rules:

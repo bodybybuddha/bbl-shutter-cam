@@ -206,3 +206,26 @@ chmod +x bbl-shutter-cam-release
 ./bbl-shutter-cam-release --help
 ./dist/bbl-shutter-cam --help
 ```
+
+---
+
+## Publishing Releases
+
+For maintainers creating official releases, see the [Release Process](../../CONTRIBUTING.md#release-process) in CONTRIBUTING.md.
+
+### Quick Reference
+
+1. **Test locally** using the checklist above
+2. **Create release branch** from `dev`
+3. **Update** CHANGELOG.md, ROADMAP.md, docs
+4. **Merge PR** to `dev`
+5. **Tag release**: `git tag -a v1.0.3 -m "..."`
+6. **Push tag**: `git push origin refs/tags/v1.0.3`
+7. **Create GitHub Release**: https://github.com/bodybybuddha/bbl-shutter-cam/releases/new
+   - Select the tag you just pushed
+   - Add release notes
+   - **Click "Publish release"** (this triggers the build workflow)
+8. **Wait for binaries**: GitHub Actions builds and uploads ARM binaries (~5-10 min)
+9. **Verify release**: Download and test a binary
+
+> **Important**: The automated build workflow only triggers when you **publish** a GitHub Release, not when you push a tag. Publishing the release will automatically build and upload the Linux ARM64 and ARMv7 binaries.
