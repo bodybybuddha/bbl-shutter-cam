@@ -22,9 +22,6 @@ if exist dist (
 if exist build (
     rmdir /s /q build
 )
-for %%f in (*.spec) do (
-    del "%%f"
-)
 
 REM Build executable
 echo Building executable...
@@ -32,10 +29,11 @@ python -m PyInstaller ^
     --onefile ^
     --console ^
     --name bbl-shutter-cam ^
+    --paths src ^
     --add-data src/bbl_shutter_cam;bbl_shutter_cam ^
     --hidden-import=bleak ^
     --hidden-import=tomlkit ^
-    src/bbl_shutter_cam/cli.py
+    scripts/pyinstaller_entry.py
 
 echo.
 if exist "dist\bbl-shutter-cam.exe" (

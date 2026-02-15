@@ -1,0 +1,30 @@
+# Bare-minimum configuration for bbl-shutter-cam
+#
+# Copy to:
+#   ~/.config/bbl-shutter-cam/config.toml
+#
+# Then run:
+#   bbl-shutter-cam setup --profile default
+#
+# `setup` will learn and write the device MAC + notify UUID.
+
+default_profile = "default"
+
+[profiles]
+
+[profiles.default]
+
+[profiles.default.device]
+name = "BBL_SHUTTER"
+# mac = "AA:BB:CC:DD:EE:FF"
+# notify_uuid = "00002a4d-0000-1000-8000-00805f9b34fb"
+
+[profiles.default.camera]
+output_dir = "~/captures/default"
+filename_format = "%Y%m%d_%H%M%S.jpg"
+min_interval_sec = 0.5
+
+[profiles.default.camera.rpicam]
+width = 1920
+height = 1080
+nopreview = true

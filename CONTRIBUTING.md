@@ -12,6 +12,7 @@ Thank you for your interest in contributing to this project! This guide covers s
 - [Running Tasks](#running-tasks)
 - [Code Style](#code-style)
 - [Testing](#testing)
+- [Versioning](#versioning)
 - [Submitting Changes](#submitting-changes)
 
 ---
@@ -191,6 +192,40 @@ When using VSCode:
 
 Tests are located in the `tests/` directory and use **pytest**.
 
+---
+
+## Versioning
+
+This project uses **Semantic Versioning (SemVer)**: `MAJOR.MINOR.PATCH`.
+
+- **PATCH** (the last number) for bug fixes and small internal changes that do not change user-facing behavior.
+- **MINOR** (the middle number) for new features and backwards-compatible behavior changes.
+- **MAJOR** (the first number) for changes that may be breaking (config changes, CLI changes, behavior changes that can affect existing setups).
+
+Examples:
+
+- `1.0.1`: bug fix release
+- `1.1.0`: new feature(s) added without breaking existing usage
+- `2.0.0`: breaking change release
+
+### Breaking Changes & Deprecations
+
+When a change may break existing setups (CLI flags, config structure/keys/defaults, runtime behavior changes):
+
+- Prefer a deprecation path when practical (warn first, document migration).
+- Clearly document the change and the migration steps in `CHANGELOG.md` and relevant `docs/` pages.
+- Use SemVer consistently (breaking changes should generally require a MAJOR bump).
+
+---
+
+## Maintainer Notes (Repo Policy)
+
+These are typically enforced via GitHub branch protection rules:
+
+- Protect `main` and `dev` (require PRs; no direct pushes).
+- Require status checks (at minimum: lint/test, PR Policy; optionally PR Title).
+- Require reviews for sensitive areas (see `.github/CODEOWNERS`).
+
 ### Run All Tests
 
 ```bash
@@ -290,9 +325,23 @@ bbl-shutter-cam/
 
 ### 1. Create a Branch
 
+Post-v1, all work is done in short-lived branches created from `dev`, and merged back into `dev` via pull requests.
+
 ```bash
+git checkout dev
+git pull --ff-only
 git checkout -b feature/my-feature
 ```
+
+Branch naming conventions:
+
+- `feature/<short-description>` for new features
+- `bugfix/<short-description>` for bug fixes
+
+PR target rules:
+
+- Open PRs into `dev`
+- Only merge `dev` into `main` for releases (release PR should be `dev` → `main`)
 
 ### 2. Make Changes
 
@@ -322,7 +371,7 @@ Or run the "Dev environment setup" task in VSCode.
 git push origin feature/my-feature
 ```
 
-Then open a Pull Request on GitHub. Include:
+Then open a Pull Request on GitHub (target `dev`). Include:
 - Description of what changed and why
 - Relevant issue numbers (e.g., "Closes #42")
 - Screenshots if UI-related

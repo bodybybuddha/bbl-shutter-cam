@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-02-15
+
+### Fixed
+- PyInstaller-built Raspberry Pi binaries now run correctly by avoiding relative-import failures in the frozen CLI entrypoint
+
 ## [1.0.0] - 2026-02-14
 
 ### Added
@@ -75,5 +80,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.3.0]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v0.2.0...v0.3.0
 [0.3.1]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v0.3.0...v0.3.1
 [1.0.0]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v0.3.1...v1.0.0
+[1.0.1]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v1.0.0...v1.0.1
 [0.2.0]: https://github.com/bodybybuddha/bbl-shutter-cam/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bodybybuddha/bbl-shutter-cam/releases/tag/v0.1.0

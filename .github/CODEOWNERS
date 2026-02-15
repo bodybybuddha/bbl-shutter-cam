@@ -1,0 +1,15 @@
+# Default owners for the repository
+* @bodybybuddha
+
+# Require extra attention for CI/CD and packaging
+/.github/workflows/ @bodybybuddha
+/bbl-shutter-cam.spec @bodybybuddha
+/scripts/ @bodybybuddha
+
+# Config + docs are user-facing
+/src/bbl_shutter_cam/config.py @bodybybuddha
+/examples/ @bodybybuddha
+/docs/ @bodybybuddha
+/README.md @bodybybuddha
+/CHANGELOG.md @bodybybuddha
+/ROADMAP.md @bodybybuddha

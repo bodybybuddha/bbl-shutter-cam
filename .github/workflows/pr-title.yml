@@ -1,0 +1,54 @@
+name: PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce PR title convention
+        shell: bash
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          echo "PR title: $title"
+
+          base="${{ github.base_ref }}"
+          head="${{ github.head_ref }}"
+          echo "Base branch: $base"
+          echo "Head branch: $head"
+
+          # Conventional format:
+          #   type(scope?): summary
+          # Examples:
+          #   feat: add new tuning option
+          #   fix(ble): handle disconnect
+          #   docs: update quick start
+          #   release: v1.0.1
+          pattern='^(feat|fix|docs|chore|refactor|test|ci|build|perf|release)(\([^)]+\))?: .{3,}$'
+          release_pattern='^release: v[0-9]+\.[0-9]+\.[0-9]+$'
+
+          if [[ ! "$title" =~ $pattern ]]; then
+            echo "::error::PR title must match: type(scope?): summary"
+            echo "::error::Allowed types: feat, fix, docs, chore, refactor, test, ci, build, perf, release"
+            echo "::error::Example: feat(cli): add --dry-run"
+            exit 1
+          fi
+
+          # Extra rules for release PRs.
+          if [[ "$title" == release:* ]]; then
+            if [[ ! "$title" =~ $release_pattern ]]; then
+              echo "::error::Release PR title must be exactly: release: vMAJOR.MINOR.PATCH"
+              echo "::error::Example: release: v1.0.1"
+              exit 1
+            fi
+
+            if [[ "$base" != "main" || "$head" != "dev" ]]; then
+              echo "::error::'release:' titles are only allowed for release PRs from dev -> main."
+              echo "::error::Retarget the PR to base=main and head=dev, or use a non-release title."
+              exit 1
+            fi
+          fi
+
+          echo "PR title convention OK."
