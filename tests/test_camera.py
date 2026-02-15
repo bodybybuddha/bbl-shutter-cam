@@ -2,6 +2,7 @@
 
 Tests camera configuration, command building, and file management.
 """
+
 import tempfile
 from datetime import datetime
 from pathlib import Path

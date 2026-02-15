@@ -2,6 +2,7 @@
 
 Tests configuration file loading, profile management, and TOML parsing.
 """
+
 import tempfile
 from pathlib import Path
 

@@ -10,6 +10,7 @@ settings. Users can:
 All tuning is done via keyboard input without graphical dependencies,
 making it suitable for SSH/headless operation.
 """
+
 from __future__ import annotations
 
 import subprocess

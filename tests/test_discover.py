@@ -1,4 +1,5 @@
 """Unit tests for discover.py module."""
+
 import asyncio
 from dataclasses import dataclass
 from pathlib import Path

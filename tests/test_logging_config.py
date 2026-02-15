@@ -1,4 +1,5 @@
 """Unit tests for logging_config.py module."""
+
 import logging
 from pathlib import Path
 

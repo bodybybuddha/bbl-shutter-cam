@@ -8,6 +8,7 @@ Provides structures and utilities for:
 
 All camera settings are exposed as configuration options with sensible defaults.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
