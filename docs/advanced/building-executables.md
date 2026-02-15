@@ -45,7 +45,7 @@ If the scripts don't work for your setup:
 # Install dependencies
 pip install -e ".[dev]"
 
-# Build the executable
+# Build the executable (preferred)
 pyinstaller bbl-shutter-cam.spec
 
 # Executable will be in dist/ folder
@@ -108,6 +108,15 @@ Add the module to `hiddenimports` in `bbl-shutter-cam.spec`:
 
 ```python
 hiddenimports=['bleak', 'tomlkit', 'your_module_here'],
+```
+
+### "attempted relative import with no known parent package"
+
+This usually happens if you freeze `src/bbl_shutter_cam/cli.py` directly.
+Build using the provided spec or wrapper entry script instead:
+
+```bash
+python -m PyInstaller --onefile --console --name bbl-shutter-cam --paths src scripts/pyinstaller_entry.py
 ```
 
 ### File size is large
