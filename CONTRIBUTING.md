@@ -290,9 +290,23 @@ bbl-shutter-cam/
 
 ### 1. Create a Branch
 
+Post-v1, all work is done in short-lived branches created from `dev`, and merged back into `dev` via pull requests.
+
 ```bash
+git checkout dev
+git pull --ff-only
 git checkout -b feature/my-feature
 ```
+
+Branch naming conventions:
+
+- `feature/<short-description>` for new features
+- `bugfix/<short-description>` for bug fixes
+
+PR target rules:
+
+- Open PRs into `dev`
+- Only merge `dev` into `main` for releases (release PR should be `dev` → `main`)
 
 ### 2. Make Changes
 
@@ -322,7 +336,7 @@ Or run the "Dev environment setup" task in VSCode.
 git push origin feature/my-feature
 ```
 
-Then open a Pull Request on GitHub. Include:
+Then open a Pull Request on GitHub (target `dev`). Include:
 - Description of what changed and why
 - Relevant issue numbers (e.g., "Closes #42")
 - Screenshots if UI-related
