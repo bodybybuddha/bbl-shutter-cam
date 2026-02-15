@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-02-15
+
+### Changed
+- Documentation: Reorganized Quick Start section with standalone executable as primary installation option
+- Documentation: All GitHub Pages links updated from trailing slash to .html extension format
+
+### Fixed
+- Documentation links now properly resolve on GitHub Pages site
+
 ## [1.0.1] - 2026-02-15
 
 ### Fixed
