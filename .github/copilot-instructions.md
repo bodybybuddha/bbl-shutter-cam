@@ -32,4 +32,7 @@ These instructions define how automated agents should work in this repository.
   - `README.md`
   - anything under `docs/`
 - Do not merge changes into `dev` without the documentation updates for that change.
+- If a change modifies what is stored in the config file (new keys, changed defaults, renamed/removed settings, profile structure), update the examples in the same PR:
+  - `examples/config.example`
+  - `examples/config.minimal.toml`
 - Prefer editing existing files over adding new ones unless required.

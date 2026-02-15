@@ -5,6 +5,7 @@ Describe what changed and why.
 ## Checklist
 
 - [ ] This PR targets `dev` (feature/bugfix work should not target `main`).
+- [ ] If config keys/structure changed, updated `examples/config.example` (and `examples/config.minimal.toml`).
 - [ ] Tests passed (`python -m pytest tests/ -v`).
 - [ ] Lint passed (`python -m pylint src/bbl_shutter_cam/`).
 - [ ] Type check passed (`python -m mypy src/bbl_shutter_cam/`).
