@@ -33,6 +33,7 @@ jobs:
           SUFFIX: ${{ matrix.suffix }}
         run: |
           docker run --rm --platform ${{ matrix.platform }} \
+            --user $(id -u):$(id -g) \
             -v "$GITHUB_WORKSPACE:/workspace" \
             -w /workspace \
             python:3.11-bullseye \
@@ -45,9 +46,8 @@ jobs:
                 --add-data src/bbl_shutter_cam:bbl_shutter_cam \
                 --hidden-import=bleak \
                 --hidden-import=tomlkit \
-                src/bbl_shutter_cam/cli.py"
-          sudo chown -R $USER:$USER dist
-          mv dist/bbl-shutter-cam dist/bbl-shutter-cam-${VERSION}-${SUFFIX}
+                src/bbl_shutter_cam/cli.py && \
+              mv dist/bbl-shutter-cam dist/bbl-shutter-cam-\$VERSION-\$SUFFIX"
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
