@@ -13,6 +13,6 @@ Key components:
     - `util`: Logging and utility functions
 """
 
-__version__ = "0.2.0"
+__version__ = "1.0.1"
 __author__ = "Casa Taylor"
 __license__ = "MIT"

@@ -30,7 +30,7 @@ fi
 # Clean old builds
 if [ -d "dist" ]; then
     echo "🧹 Cleaning old build files..."
-    rm -rf dist/ build/ *.spec
+    rm -rf dist/ build/
 fi
 
 # Build executable
@@ -39,10 +39,11 @@ python3 -m PyInstaller \
     --onefile \
     --console \
     --name bbl-shutter-cam \
+    --paths src \
     --add-data src/bbl_shutter_cam:bbl_shutter_cam \
     --hidden-import=bleak \
     --hidden-import=tomlkit \
-    src/bbl_shutter_cam/cli.py
+    scripts/pyinstaller_entry.py
 
 echo ""
 echo "✅ Build complete!"

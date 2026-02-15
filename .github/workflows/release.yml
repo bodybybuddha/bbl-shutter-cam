@@ -49,14 +49,7 @@ jobs:
               . /tmp/venv/bin/activate && \
               python -m pip install --upgrade pip && \
               pip install -e .[dev] && \
-              python -m PyInstaller \
-                --onefile \
-                --console \
-                --name bbl-shutter-cam \
-                --add-data src/bbl_shutter_cam:bbl_shutter_cam \
-                --hidden-import=bleak \
-                --hidden-import=tomlkit \
-                src/bbl_shutter_cam/cli.py"
+              python -m PyInstaller --clean --noconfirm bbl-shutter-cam.spec"
 
       - name: Rename binary
         run: |
