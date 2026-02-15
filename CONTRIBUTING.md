@@ -208,6 +208,24 @@ Examples:
 - `1.1.0`: new feature(s) added without breaking existing usage
 - `2.0.0`: breaking change release
 
+### Breaking Changes & Deprecations
+
+When a change may break existing setups (CLI flags, config structure/keys/defaults, runtime behavior changes):
+
+- Prefer a deprecation path when practical (warn first, document migration).
+- Clearly document the change and the migration steps in `CHANGELOG.md` and relevant `docs/` pages.
+- Use SemVer consistently (breaking changes should generally require a MAJOR bump).
+
+---
+
+## Maintainer Notes (Repo Policy)
+
+These are typically enforced via GitHub branch protection rules:
+
+- Protect `main` and `dev` (require PRs; no direct pushes).
+- Require status checks (at minimum: lint/test, PR Policy; optionally PR Title).
+- Require reviews for sensitive areas (see `.github/CODEOWNERS`).
+
 ### Run All Tests
 
 ```bash

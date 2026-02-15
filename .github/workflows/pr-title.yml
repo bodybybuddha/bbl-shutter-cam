@@ -1,0 +1,33 @@
+name: PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce PR title convention
+        shell: bash
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          echo "PR title: $title"
+
+          # Conventional format:
+          #   type(scope?): summary
+          # Examples:
+          #   feat: add new tuning option
+          #   fix(ble): handle disconnect
+          #   docs: update quick start
+          #   release: v1.0.1
+          pattern='^(feat|fix|docs|chore|refactor|test|ci|build|perf|release)(\([^)]+\))?: .{3,}$'
+
+          if [[ ! "$title" =~ $pattern ]]; then
+            echo "::error::PR title must match: type(scope?): summary"
+            echo "::error::Allowed types: feat, fix, docs, chore, refactor, test, ci, build, perf, release"
+            echo "::error::Example: feat(cli): add --dry-run"
+            exit 1
+          fi
+
+          echo "PR title convention OK."

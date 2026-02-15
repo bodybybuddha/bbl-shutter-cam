@@ -3,6 +3,22 @@
 ## Overview
 This document tracks development releases and features for the bbl-shutter-cam project. The goal is to create a reliable, multi-machine, multi-camera time-lapse capture system using Bambu Lab's BBL_SHUTTER Bluetooth trigger.
 
+## Release Process (Standard)
+
+Use the following checklist to keep releases consistent and reproducible:
+
+- All feature/bugfix work lands in `dev` via PRs (no direct commits to `dev`/`main`).
+- Create a release PR from `dev` → `main`.
+- Update documentation and examples as part of the release PR when applicable:
+  - `CHANGELOG.md` (new version section; follow SemVer)
+  - `README.md` and any relevant `docs/` pages
+  - `examples/config.example` and `examples/config.minimal.toml` (if config changed)
+  - `ROADMAP.md` (mark milestone complete / adjust upcoming items)
+- Ensure CI is green on the release PR.
+- Merge the release PR.
+- Create a tag/release on `main` (tags/releases should point at `main`).
+- Verify release artifacts (Pi binaries) are attached and runnable.
+
 ---
 
 # Released Versions
