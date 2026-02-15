@@ -8,6 +8,7 @@ Provides argument parsing and command handlers for:
 
 All commands use async/await for non-blocking BLE operations.
 """
+
 from __future__ import annotations
 
 import argparse

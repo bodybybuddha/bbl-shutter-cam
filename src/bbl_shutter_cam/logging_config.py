@@ -3,6 +3,7 @@
 This module provides centralized logging configuration and utilities
 for different deployment scenarios (development, headless, systemd).
 """
+
 from __future__ import annotations
 
 import logging

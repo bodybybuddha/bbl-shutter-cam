@@ -9,6 +9,7 @@ High-level functions for:
 This module bridges configuration, BLE, and camera modules to provide the
 core photo capture functionality.
 """
+
 from __future__ import annotations
 
 import asyncio

@@ -26,6 +26,7 @@ Configuration structure:
     width = 1920
     height = 1080
 """
+
 from __future__ import annotations
 
 from pathlib import Path
