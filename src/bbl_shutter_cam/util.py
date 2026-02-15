@@ -88,41 +88,49 @@ class Logger:
             except Exception:
                 pass
 
-    def debug(self, msg: str) -> None:
+    def debug(self, msg: str, *args: Any) -> None:
         """Log a debug-level message.
 
         Args:
-            msg: Message to log
+            msg: Message format string to log
+            *args: Arguments for string formatting
         """
         if self.level <= LogLevel.DEBUG:
-            self._write(f"{self._prefix('[D]')} {msg}")
+            formatted = msg % args if args else msg
+            self._write(f"{self._prefix('[D]')} {formatted}")
 
-    def info(self, msg: str) -> None:
+    def info(self, msg: str, *args: Any) -> None:
         """Log an info-level message.
 
         Args:
-            msg: Message to log
+            msg: Message format string to log
+            *args: Arguments for string formatting
         """
         if self.level <= LogLevel.INFO:
-            self._write(f"{self._prefix('[=]')} {msg}")
+            formatted = msg % args if args else msg
+            self._write(f"{self._prefix('[=]')} {formatted}")
 
-    def warning(self, msg: str) -> None:
+    def warning(self, msg: str, *args: Any) -> None:
         """Log a warning-level message.
 
         Args:
-            msg: Message to log
+            msg: Message format string to log
+            *args: Arguments for string formatting
         """
         if self.level <= LogLevel.WARNING:
-            self._write(f"{self._prefix('[!]')} {msg}")
+            formatted = msg % args if args else msg
+            self._write(f"{self._prefix('[!]')} {formatted}")
 
-    def error(self, msg: str) -> None:
+    def error(self, msg: str, *args: Any) -> None:
         """Log an error-level message.
 
         Args:
-            msg: Message to log
+            msg: Message format string to log
+            *args: Arguments for string formatting
         """
         if self.level <= LogLevel.ERROR:
-            self._write(f"{self._prefix('[X]')} {msg}")
+            formatted = msg % args if args else msg
+            self._write(f"{self._prefix('[X]')} {formatted}")
 
 
 # Global logger instance used throughout the application.

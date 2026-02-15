@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import subprocess
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from bleak import BleakScanner
 
