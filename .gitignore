@@ -49,6 +49,8 @@ MANIFEST
 # PyInstaller
 *.manifest
 *.spec
+# Exception: commit bbl-shutter-cam.spec for release builds
+!bbl-shutter-cam.spec
 
 # Installer logs
 pip-log.txt
