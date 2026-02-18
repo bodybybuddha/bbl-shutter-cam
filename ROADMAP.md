@@ -286,6 +286,145 @@ capture = false
 
 ---
 
+## Stage 4: Web Streaming & Home Assistant Integration 📋 Planned (Post-v1)
+
+### Objectives
+- Add optional web-based live streaming capability for remote monitoring
+- Enable Home Assistant integration for camera feeds and remote control
+- Maintain lightweight operation on constrained devices (Raspberry Pi Zero 2W)
+- Preserve Bluetooth shutter as primary reliable trigger for time-lapse capture
+- Restore systemd service functionality for long-running operation
+
+### Key Design Principles
+- **Non-intrusive**: Streaming is optional and disabled by default
+- **On-demand**: Stream only starts when endpoint is accessed; stops on client disconnect
+- **Resource-aware**: MJPEG streaming at modest resolution (640×480) for Pi Zero 2W compatibility
+- **Single process**: Web server runs alongside BLE listener in same systemd service
+- **Dual capture paths**:
+  - Primary: Bluetooth shutter trigger → rpicam-still (clean time-lapse sequences)
+  - Secondary: Manual triggers via web UI + streaming preview
+
+### Planned Implementation
+
+#### Core Features
+- [ ] **HTTP API Server** (Flask or FastAPI)
+  - `/snapshot` endpoint: Single JPEG image on demand (zero encoding overhead)
+  - `/stream` endpoint: On-demand MJPEG stream with configurable timeout (default 300s)
+  - Stream auto-stops on client disconnect or timeout
+  - Low-power operation between requests
+  
+- [ ] **Web UI** (minimal HTML/JS)
+  - Live preview window showing MJPEG stream
+  - Manual snapshot button for captured stills
+  - Stream start/stop controls
+  - Connection status indicator
+
+- [ ] **Home Assistant Integration**
+  - Camera entity with configurable stream URL
+  - Snapshot support for dashboards
+  - Optional manual trigger endpoint (if desired)
+  - MQTT support for advanced integrations (optional phase 2)
+
+- [ ] **Systemd Service Restoration**
+  - Unified service running BLE listener + web server
+  - New CLI flag `--web-port [PORT]` to enable streaming (default: disabled)
+  - Example: `bbl-shutter-cam run --profile my-printer --web-port 8080`
+  - Service remains daemonizable via systemd (reverts decision from post-v1.0.0 notes)
+
+- [ ] **Configuration Updates**
+  - Optional `[server]` section in profile config for streaming settings
+  - Configurable stream resolution, quality, timeout, and idle behavior
+  - Default presets for different hardware tiers (Pi 5, Pi 4, Pi Zero 2W)
+
+#### Technical Specifications
+
+**Stream Architecture:**
+- MJPEG protocol (Motion JPEG) for compatibility and low CPU overhead
+- libcamera/picamera2 native streaming where possible
+- Single concurrent stream maximum (Pi Zero 2W resource constraint)
+- Graceful fallback if stream unavailable
+
+**Performance Targets (Pi Zero 2W):**
+- Stream resolution: 640×480 default
+- Frame rate: 10-15 fps (acceptable for preview)
+- Latency: <2 seconds first frame
+- Memory overhead: <50 MB for web server
+- CPU overhead: <10% at idle, <40% when streaming
+
+**Home Assistant Integration:**
+- Native camera entity config via YAML
+- Auto-discovery via MQTT (optional)
+- Manual URL entry as fallback
+- Support for snapshot + stream URLs for flexible HA deployments
+
+### Planned Tasks
+- [ ] Create `streaming.py` module (web server + stream handlers)
+- [ ] Add Flask/Werkzeug dependencies to `pyproject.toml`
+- [ ] Extend `CameraConfig` dataclass with stream settings
+- [ ] Update `cli.py` to support `--web-port` flag on `run` command
+- [ ] Integrate Flask server with existing BLE listener in main loop
+- [ ] Build minimal HTML template for web UI
+- [ ] Create on-demand MJPEG generator with timeout logic
+- [ ] Add `/snapshot` and `/stream` endpoint handlers
+- [ ] Update config schema with `[server]` section examples
+- [ ] Write comprehensive Home Assistant integration guide
+- [ ] Document stream architecture and resource usage
+- [ ] Add integration tests for streaming endpoints
+- [ ] Update systemd service template with streaming examples
+- [ ] Create troubleshooting guide for streaming connectivity issues
+
+### Configuration Examples
+
+**Enable streaming with defaults:**
+```toml
+[profiles.my-printer]
+# ... existing config ...
+
+# Optional: customize stream settings
+[profiles.my-printer.server]
+web_port = 8080
+stream_resolution = "640x480"
+stream_fps = 12
+stream_timeout_seconds = 300
+jpeg_quality = 80
+```
+
+**Home Assistant YAML configuration:**
+```yaml
+camera:
+  - platform: generic
+    name: "Printer Timelapse"
+    still_image_url: "http://raspberrypi.local:8080/snapshot"
+    stream_source: "http://raspberrypi.local:8080/stream"
+    framerate: 12
+```
+
+### Dependencies
+- v1.0.0 release complete
+- Hardware detection stage (if sequenced after)
+- System: Flask or FastAPI, Python 3.9+
+- Camera: libcamera/picamera2 with streaming support
+
+### Phase Planning
+- **Phase 1** (immediate): `/snapshot` endpoint, basic web UI
+- **Phase 2** (following): On-demand MJPEG streaming with timeout
+- **Phase 3**: Full Home Assistant integration docs + MQTT support
+
+### Testing Strategy
+- Unit tests for stream handlers and timeout logic
+- Integration tests for endpoint accessibility and resource cleanup
+- Manual testing on Pi Zero 2W to verify resource footprint
+- Documentation of expected behavior on different hardware tiers
+
+### Considerations & Risks
+- **MJPEG vs H.264**: Prioritized MJPEG for CPU simplicity; can revisit if needed
+- **Concurrent streams**: Limiting to 1 stream to avoid resource exhaustion
+- **Network bandwidth**: User responsible for network capacity; guide provided
+- **Security**: Initial version assumes trusted network; add auth in phase 2 if needed
+- **Thermal**: Continuous streaming may trigger Pi Zero 2W throttling; timeout mitigates
+
+---
+
 ## Future: Extended Features 📋 Planned (Post-v1)
 
 ### Objectives
@@ -315,8 +454,8 @@ capture = false
 - File logging with rotation for production/headless
 - Compatible with existing `util.py` LOG infrastructure
 
-### Systemd Service (Removed from Roadmap)
-While bbl-shutter-cam is designed for headless operation on Raspberry Pi, it does not run as a persistent daemon or background service. The tool operates on-demand when triggered by Bluetooth signals from the printer. A systemd service template was considered but removed from the roadmap as it doesn't align with the tool's event-driven architecture.
+### Systemd Service
+While bbl-shutter-cam was initially designed as an event-driven tool without persistent daemon functionality, restoring systemd service capability is planned in Stage 4 (Web Streaming). This will allow the tool to run as a background service alongside streaming functionality when configured with `--web-port`. For headless time-lapse operation without streaming needs, the tool continues to operate on-demand as per the original design.
 
 ### Multi-Machine Deployment
 - User configs stored in `~/.config/bbl-shutter-cam/config.toml`

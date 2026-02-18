@@ -204,9 +204,14 @@ python -m pytest tests/ -v          # Run tests
 **Status:** Stable - v1.0.0 release
 
 **Roadmap:** See [ROADMAP.md](ROADMAP.md) for planned features:
-- Web-based UI
-- Multi-camera support
-- Hardware detection
+- Hardware detection & interactive setup wizard (Stage TBD)
+- **Web streaming & Home Assistant integration** - Live preview and remote monitoring (Stage 4, planned post-v1)
+  - Optional `/snapshot` and `/stream` HTTP endpoints
+  - Lightweight on Pi Zero 2W (MJPEG @ 640×480, 10-15 fps)
+  - Home Assistant camera entity integration
+  - Smartphone-friendly web UI
+  - See [Web Streaming Documentation](https://bodybybuddha.github.io/bbl-shutter-cam/advanced/web-streaming.html) for details
+- Multi-machine CLI and config management (future)
 
 ---
 
