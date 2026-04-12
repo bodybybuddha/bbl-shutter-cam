@@ -56,7 +56,7 @@ jobs:
           mv dist/bbl-shutter-cam dist/bbl-shutter-cam-${VERSION}-${{ matrix.suffix }}
 
       - name: Upload release assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.VERSION }}
           files: dist/bbl-shutter-cam-${{ env.VERSION }}-${{ matrix.suffix }}
