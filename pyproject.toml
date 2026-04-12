@@ -37,7 +37,7 @@ dev = [
   "pytest-cov>=4.0,<8",
   "black>=23.0,<26",
   "pylint>=3.0,<4",
-  "mypy>=1.0,<2",
+  "mypy>=1.19.1,<2",
   "pyinstaller>=6.0,<7",
 ]
 
