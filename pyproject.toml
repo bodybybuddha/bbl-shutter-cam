@@ -32,6 +32,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+web = [
+  "fastapi>=0.110,<1.0",
+  "uvicorn>=0.30,<1.0",
+]
 dev = [
   "pytest>=7.0,<9",
   "pytest-cov>=4.0,<8",
@@ -39,6 +43,9 @@ dev = [
   "pylint>=3.0,<4",
   "mypy>=1.0,<2",
   "pyinstaller>=6.0,<7",
+  "httpx>=0.27,<1.0",  # required by fastapi.testclient.TestClient
+  "fastapi>=0.110,<1.0",
+  "uvicorn>=0.30,<1.0",
 ]
 
 [project.urls]
@@ -114,3 +121,18 @@ exclude = [
   "^build/",
   "^dist/",
 ]
+
+# Some third-party dependencies pulled in by the optional "web" extra ship
+# py.typed and use match statements in their own source. With
+# python_version pinned to 3.9 above, mypy parses everything it follows
+# imports into - including third-party library internals - as 3.9 syntax,
+# which fails on any of them using 3.10+ syntax internally. We only need
+# mypy to check our own code, not these libraries' internals - but a
+# blanket `follow_imports = "skip"` (tried first) throws away real type
+# information from libraries we DO want checked against (tomlkit, bleak),
+# producing new errors and stale `type: ignore`s elsewhere. So this is
+# scoped to just the packages that have actually tripped this, added to
+# as needed rather than applied globally.
+[[tool.mypy.overrides]]
+module = ["anyio.*", "click.*"]
+follow_imports = "skip"

@@ -14,9 +14,11 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 from . import discover, tune
+from .camera import camera_config_from_profile, stream_config_from_profile
 from .config import DEFAULT_CONFIG_PATH, ensure_config_exists, load_profile
 from .util import LOG, configure_logging
 
@@ -113,6 +115,33 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--verbose", action="store_true", help="Print BLE notification payloads")
     run.add_argument(
         "--reconnect-delay", type=float, default=2.0, help="Seconds between reconnect attempts"
+    )
+    run.add_argument(
+        "--web-port",
+        type=int,
+        default=None,
+        help="Enable the optional web server (snapshot/manual capture) on this port. "
+        "Disabled by default. Requires: pip install bbl-shutter-cam[web]",
+    )
+    run.add_argument(
+        "--enable-stream",
+        action="store_true",
+        help="Also enable the live MJPEG /stream endpoint (requires --web-port). "
+        "Opt-in separately from --web-port so /snapshot + /capture-only setups "
+        "never expose streaming capability.",
+    )
+    run.add_argument(
+        "--stream-resolution",
+        default=None,
+        metavar="WxH",
+        help="Override the profile's stream_resolution for this run (e.g. 1920x1080), "
+        "for quickly testing different hardware capability levels",
+    )
+    run.add_argument(
+        "--stream-fps",
+        type=int,
+        default=None,
+        help="Override the profile's stream_fps for this run",
     )
     run.set_defaults(func=_cmd_run)
 
@@ -288,6 +317,10 @@ def _cmd_run(args: argparse.Namespace) -> int:
             - dry_run: If True, logs triggers but doesn't capture photos
             - verbose: Whether to print BLE notification payloads
             - reconnect_delay: Seconds between reconnection attempts
+            - web_port: If set, also runs the optional web server on this port
+            - enable_stream: If True, also enables the live MJPEG /stream route
+            - stream_resolution: Optional "WxH" override for this run
+            - stream_fps: Optional frame-rate override for this run
 
     Returns:
         0 on normal exit, 1 on error (typically not reached due to Ctrl+C).
@@ -295,15 +328,45 @@ def _cmd_run(args: argparse.Namespace) -> int:
     cfg_path = Path(args.config).expanduser()
     ensure_config_exists(cfg_path)
 
+    if args.enable_stream and not args.web_port:
+        LOG.error("--enable-stream requires --web-port.")
+        return 1
+
     prof = load_profile(cfg_path, args.profile)
-    asyncio.run(
-        discover.run_profile(
-            prof,
-            dry_run=args.dry_run,
-            verbose=args.verbose,
-            reconnect_delay=args.reconnect_delay,
-        )
+
+    ble_coro = discover.run_profile(
+        prof,
+        dry_run=args.dry_run,
+        verbose=args.verbose,
+        reconnect_delay=args.reconnect_delay,
     )
+
+    if not args.web_port:
+        asyncio.run(ble_coro)
+        return 0
+
+    try:
+        from . import streaming
+    except ImportError as e:
+        LOG.error(str(e))
+        return 1
+
+    async def _run_with_web() -> None:
+        cam_cfg = camera_config_from_profile(prof)
+        stream_cfg = stream_config_from_profile(prof)
+        if args.stream_resolution:
+            width_str, height_str = args.stream_resolution.lower().split("x", 1)
+            stream_cfg = replace(stream_cfg, width=int(width_str), height=int(height_str))
+        if args.stream_fps:
+            stream_cfg = replace(stream_cfg, fps=args.stream_fps)
+
+        app = streaming.create_app(cam_cfg, stream_cfg, enable_stream=args.enable_stream)
+        await asyncio.gather(
+            ble_coro,
+            streaming.run_server(app, "0.0.0.0", args.web_port),
+        )
+
+    asyncio.run(_run_with_web())
     return 0
 
 
