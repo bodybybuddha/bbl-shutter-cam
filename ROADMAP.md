@@ -358,22 +358,23 @@ capture = false
 - Support for snapshot + stream URLs for flexible HA deployments
 
 ### Planned Tasks
-- [x] Create `streaming.py` module (web server + capture/snapshot handlers; MJPEG stream handler still pending)
+- [x] Create `streaming.py` module (web server + capture/snapshot/MJPEG stream handlers)
 - [x] Add FastAPI/uvicorn dependencies as an optional `[web]` extra in `pyproject.toml` (chose FastAPI/uvicorn over Flask/Werkzeug — runs natively in the existing asyncio event loop alongside `bleak`, no bridging thread needed)
-- [ ] Extend `CameraConfig` dataclass with stream settings
+- [x] Extend camera config with stream settings — added a separate `StreamConfig` dataclass (`camera.py`) rather than extending `CameraConfig`, since streaming uses a different tool (`rpicam-vid`, not `rpicam-still`) with its own resolution/fps tradeoffs
 - [x] Update `cli.py` to support `--web-port` flag on `run` command
 - [x] Integrate the web server with the existing BLE listener in the main loop (`asyncio.gather`)
 - [x] Build minimal HTML template for web UI
-- [ ] Create on-demand MJPEG generator with timeout logic
+- [x] Create on-demand MJPEG generator with timeout logic (`StreamSession` in `streaming.py`; thread + `subprocess.Popen`-based rather than `asyncio.create_subprocess_exec`, so `capture_mode="pause"` can stop/restart it synchronously from the BLE callback)
 - [x] Add `/snapshot` endpoint handler
 - [x] Add `/capture` endpoint handler (manual/Home Assistant-triggered capture, saved into the normal numbered sequence; camera access serialized against BLE-triggered captures via a shared lock)
-- [ ] Add `/stream` endpoint handler
-- [ ] Update config schema with `[server]` section examples
+- [x] Add `/stream` endpoint handler (opt-in via `--enable-stream`, separate from `--web-port`; single-viewer-only, 404/409 for disabled/in-use)
+- [x] Update config schema with `[server]` section examples (`stream_resolution`, `stream_fps`, `jpeg_quality`, `stream_timeout_seconds`, `capture_mode` — see `docs/advanced/web-streaming.md`)
 - [ ] Write comprehensive Home Assistant integration guide
-- [ ] Document stream architecture and resource usage
-- [x] Add tests for streaming endpoints (`tests/test_streaming.py`)
+- [x] Document stream architecture and resource usage (measured, not estimated — see resource table in `docs/advanced/web-streaming.md`)
+- [x] Add tests for streaming endpoints (`tests/test_streaming.py`, plus capture-cooperation tests in `tests/test_camera.py`)
 - [ ] Update systemd service template with streaming examples
 - [ ] Create troubleshooting guide for streaming connectivity issues
+- [x] **Not originally planned, added during implementation:** `capture_mode` (`"frame"`/`"pause"`) resolving the rpicam-still-vs-rpicam-vid camera-exclusivity conflict when a capture is triggered during an active stream — see "Capturing during an active stream" in `docs/advanced/web-streaming.md`
 
 ### Configuration Examples
 

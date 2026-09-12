@@ -19,7 +19,7 @@ from typing import Any, Dict, Optional, Tuple
 from bleak import BleakScanner
 
 from . import ble
-from .camera import CAMERA_LOCK, build_rpicam_still_cmd, camera_config_from_profile, make_outfile
+from .camera import camera_config_from_profile, capture_still_sync, stream_config_from_profile
 from .config import update_profile_device_fields
 from .util import LOG
 
@@ -263,8 +263,9 @@ async def run_profile(
         raise SystemExit("[!] Profile has no device.notify_uuid. Run setup to learn it.")
 
     cam_cfg = camera_config_from_profile(profile)
+    stream_capture_mode = stream_config_from_profile(profile).capture_mode
     min_interval = cam_cfg.min_interval_sec
-    last_press = 0.0
+    last_press: Optional[float] = None
 
     # Load trigger events from config
     trigger_events = get_trigger_events(profile)
@@ -304,7 +305,7 @@ async def run_profile(
                 # Check if this is a configured trigger event
                 if b in trigger_map:
                     now = asyncio.get_event_loop().time()
-                    if now - last_press < min_interval:
+                    if last_press is not None and now - last_press < min_interval:
                         LOG.debug("Debounced press (too soon).")
                         return
                     last_press = now
@@ -315,13 +316,8 @@ async def run_profile(
                     if dry_run:
                         return
 
-                    outfile = make_outfile(cam_cfg)
-                    cmd = build_rpicam_still_cmd(cam_cfg, outfile)
-                    LOG.debug(f"Capture cmd: {' '.join(cmd)}")
-
                     try:
-                        with CAMERA_LOCK:
-                            subprocess.run(cmd, check=True)
+                        outfile = capture_still_sync(cam_cfg, capture_mode=stream_capture_mode)
                         LOG.info(f"Captured: {outfile}")
                     except subprocess.CalledProcessError as e:
                         LOG.error(f"rpicam-still failed: {e}")

@@ -141,10 +141,33 @@ def test_cmd_run_invokes_discover(monkeypatch, tmp_path):
         verbose=False,
         reconnect_delay=0.1,
         web_port=None,
+        enable_stream=False,
+        stream_resolution=None,
+        stream_fps=None,
     )
     rc = cli._cmd_run(args)
 
     assert rc == 0
+
+
+def test_cmd_run_enable_stream_requires_web_port(monkeypatch, tmp_path):
+    """--enable-stream without --web-port should error out, not silently ignore it."""
+    monkeypatch.setattr(cli, "ensure_config_exists", lambda _path: None)
+
+    args = argparse.Namespace(
+        config=tmp_path / "config.toml",
+        profile="office",
+        dry_run=True,
+        verbose=False,
+        reconnect_delay=0.1,
+        web_port=None,
+        enable_stream=True,
+        stream_resolution=None,
+        stream_fps=None,
+    )
+    rc = cli._cmd_run(args)
+
+    assert rc == 1
 
 
 def test_cmd_run_with_web_port_runs_both(monkeypatch, tmp_path):
@@ -171,7 +194,9 @@ def test_cmd_run_with_web_port_runs_both(monkeypatch, tmp_path):
     # at collection time) - patching sys.modules alone doesn't intercept
     # that. Patch the real module's functions in place instead.
     streaming = pytest.importorskip("bbl_shutter_cam.streaming")
-    monkeypatch.setattr(streaming, "create_app", lambda _cam_cfg: object())
+    monkeypatch.setattr(
+        streaming, "create_app", lambda _cam_cfg, _stream_cfg, enable_stream=False: object()
+    )
     monkeypatch.setattr(streaming, "run_server", fake_run_server)
 
     args = argparse.Namespace(
@@ -181,8 +206,63 @@ def test_cmd_run_with_web_port_runs_both(monkeypatch, tmp_path):
         verbose=False,
         reconnect_delay=0.1,
         web_port=8080,
+        enable_stream=False,
+        stream_resolution=None,
+        stream_fps=None,
     )
     rc = cli._cmd_run(args)
 
     assert rc == 0
     assert set(calls) == {"ble", "web"}
+
+
+def test_cmd_run_stream_overrides_apply(monkeypatch, tmp_path):
+    """--stream-resolution/--stream-fps should override the profile's stream config."""
+
+    async def fake_run_profile(*_args, **_kwargs):
+        return None
+
+    async def fake_run_server(_app, _host, _port):
+        return None
+
+    seen_stream_cfg = {}
+
+    def fake_create_app(_cam_cfg, stream_cfg, enable_stream=False):
+        seen_stream_cfg["width"] = stream_cfg.width
+        seen_stream_cfg["height"] = stream_cfg.height
+        seen_stream_cfg["fps"] = stream_cfg.fps
+        seen_stream_cfg["enable_stream"] = enable_stream
+        return object()
+
+    monkeypatch.setattr(cli, "ensure_config_exists", lambda _path: None)
+    monkeypatch.setattr(
+        cli,
+        "load_profile",
+        lambda _path, _name: {"device": {"mac": "AA:BB", "notify_uuid": "uuid"}},
+    )
+    monkeypatch.setattr(cli.discover, "run_profile", fake_run_profile)
+
+    streaming = pytest.importorskip("bbl_shutter_cam.streaming")
+    monkeypatch.setattr(streaming, "create_app", fake_create_app)
+    monkeypatch.setattr(streaming, "run_server", fake_run_server)
+
+    args = argparse.Namespace(
+        config=tmp_path / "config.toml",
+        profile="office",
+        dry_run=True,
+        verbose=False,
+        reconnect_delay=0.1,
+        web_port=8080,
+        enable_stream=True,
+        stream_resolution="1920x1080",
+        stream_fps=30,
+    )
+    rc = cli._cmd_run(args)
+
+    assert rc == 0
+    assert seen_stream_cfg == {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "enable_stream": True,
+    }

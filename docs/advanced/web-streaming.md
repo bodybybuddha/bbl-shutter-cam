@@ -4,7 +4,7 @@
 
 Web streaming and Home Assistant integration is a feature for bbl-shutter-cam that enables remote monitoring of your Raspberry Pi camera via a web interface and integration with Home Assistant. This allows you to view live camera feeds and remote snapshots while maintaining the **Bluetooth shutter as the primary trigger** for reliable time-lapse capture.
 
-**Status**: Phase 1 implemented (`/snapshot`, `/capture`, minimal web UI, `--web-port` flag). Live MJPEG `/stream` (Phase 2) and full Home Assistant docs/MQTT (Phase 3) are still planned.
+**Status**: Phase 1 and most of Phase 2 implemented — `/snapshot`, `/capture`, `/stream` (MJPEG, opt-in via `--enable-stream`), minimal web UI, `--web-port` flag, configurable stream resolution/fps. Home Assistant integration docs and MQTT (Phase 3) are still planned.
 **Target Device**: Raspberry Pi Zero 2W (and larger models)
 
 ---
@@ -63,13 +63,15 @@ Web button click → FastAPI endpoint → rpicam-still capture → JPEG response
 - Slightly higher latency (~1-2 seconds)
 - Serialized against BLE-triggered captures via a shared lock, so the two paths can't collide on the camera device
 
-**Path 3: Streaming (Preview Only)** — not yet implemented
+**Path 3: Streaming** ✅ Implemented
 ```
-User accesses /stream → FastAPI starts MJPEG encoder → Live feed streamed
+User accesses /stream → FastAPI starts rpicam-vid MJPEG encoder → Live feed streamed
 ```
-- Preview only, not for capture
-- Auto-stops on disconnect or timeout
-- No resource overhead when not in use
+- Primarily a live preview, but interacts with capture: see "Capturing during an active stream" below — a BLE press or `/capture` while streaming is active either reuses the current stream frame (`capture_mode = "frame"`, default) or briefly pauses/resumes the stream for a full-quality still (`capture_mode = "pause"`), since `rpicam-still` and `rpicam-vid` can't use the camera at the same time
+- Opt-in separately from `--web-port` via `--enable-stream`, so a `/snapshot` + `/capture`-only setup never exposes streaming capability at all
+- Single viewer at a time (a second `/stream` request gets `409 Conflict` while one is active), per the resource constraints below
+- Auto-stops on disconnect or timeout (`stream_timeout_seconds`, default 300s)
+- No resource overhead when not in use — `rpicam-vid` only starts once a client actually requests `/stream`
 
 ---
 
@@ -88,18 +90,28 @@ User accesses /stream → FastAPI starts MJPEG encoder → Live feed streamed
   curl http://raspberrypi.local:8080/snapshot > photo.jpg
   ```
 
-#### `/stream` Endpoint
+#### `/stream` Endpoint ✅ Implemented
 - **Purpose**: Live MJPEG stream preview
 - **Method**: GET
-- **Response**: Motion JPEG stream
-- **Auto-Timeout**: 300 seconds default (configurable)
-- **Behavior**: Stops automatically when client disconnects
-- **Resolution**: 640×480 default (configurable per hardware)
-- **Frame Rate**: 10-15 fps (Pi Zero 2W optimized)
+- **Response**: Motion JPEG stream (`multipart/x-mixed-replace`), backed by `rpicam-vid --codec mjpeg`
+- **Requires**: `--web-port` AND `--enable-stream`; returns `404` if `--enable-stream` wasn't passed, `409` if another viewer is already attached
+- **Auto-Timeout**: 300 seconds default, `stream_timeout_seconds` in `[profiles.<name>.server]`
+- **Behavior**: Stops automatically when the client disconnects or the timeout is reached; cleans up the `rpicam-vid` process either way
+- **Resolution**: 640×480 default (`stream_resolution = "WxH"` in config, or `--stream-resolution` for a one-off override — handy for testing what a Pi Zero 2W's default would look like on beefier hardware, or vice versa)
+- **Frame Rate**: 12 fps default (`stream_fps` in config, or `--stream-fps`)
 - **Example**:
   ```html
   <img src="http://raspberrypi.local:8080/stream" width="640" height="480" />
   ```
+
+#### Capturing during an active stream ✅ Implemented
+
+Since the camera can only run one of `rpicam-still` (stills) or `rpicam-vid` (streaming) at a time, a BLE press or `/capture` request that arrives while someone is watching `/stream` is handled according to `capture_mode` in `[profiles.<name>.server]`:
+
+- **`capture_mode = "frame"` (default)**: instantly reuses the most recent stream frame instead of running `rpicam-still`. Zero interruption to the viewer, but the saved photo is at stream resolution (640×480 default) rather than the profile's normal still resolution (1920×1080 default) — only for the rare capture that happens to land while someone's actively watching.
+- **`capture_mode = "pause"`**: briefly stops `rpicam-vid`, takes a full-quality `rpicam-still` capture at the profile's normal resolution, then restarts the stream. The viewer sees a short (roughly 1-3 second) gap in the feed, but every timelapse photo stays full quality regardless of whether anyone's streaming.
+
+When no stream is active, both modes behave identically — every capture is a normal full-quality `rpicam-still`.
 
 #### `/capture` Endpoint (Manual Trigger) ✅ Implemented
 - **Purpose**: Manually trigger photo capture via web/Home Assistant
@@ -141,28 +153,27 @@ camera:
 - Motion detection triggers (if desired)
 - Automation integration (if manual capture endpoint added)
 
-### 4. Configuration
+### 4. Configuration ✅ Implemented (as described here; differs slightly from the original plan)
 
-New optional `[server]` section in profile config:
+Optional `[server]` section in profile config, read by `stream_config_from_profile()`:
 
 ```toml
 [profiles.my-printer]
 # ... existing camera and BLE config ...
 
 [profiles.my-printer.server]
-# Optional streaming settings (all with sensible defaults)
-web_port = 8080
+# All settings optional; shown values are the defaults
 stream_resolution = "640x480"
 stream_fps = 12
 stream_timeout_seconds = 300
 jpeg_quality = 80
-enable_manual_capture = true
+capture_mode = "frame"  # or "pause" - see "Capturing during an active stream" above
 ```
 
-**All settings are optional** with hardware-aware defaults:
-- **Pi 5**: 1080p, 30 fps
-- **Pi 4**: 800×600, 20 fps
-- **Pi Zero 2W**: 640×480, 12 fps
+Two differences from the original plan, decided during implementation:
+- **`web_port` stays a `--web-port` CLI flag, not a config key** — whether the web server runs at all is a per-invocation choice, consistent with how the rest of the CLI works.
+- **No hardware-aware auto-defaults** (the original plan sketched Pi 5/Pi 4/Zero 2W presets) — instead, `stream_resolution`/`stream_fps` default to Zero 2W-friendly values and can be overridden per-run with `--stream-resolution`/`--stream-fps`, e.g. for testing a higher resolution on a Pi 5 or deliberately mimicking a Zero 2W's limits on other hardware.
+- **`enable_manual_capture` doesn't exist** — `/capture` is always available once `--web-port` is set (there was no clear use case for disabling just that one route while keeping `/snapshot`).
 
 ### 5. Systemd Service (Restored)
 
@@ -194,12 +205,13 @@ The service provides:
 |-----------|-------|-------|
 | Python runtime | ~30 MB | Base interpreter |
 | FastAPI/uvicorn server | ~15-20 MB | Idle, listening |
-| Streaming (active) | ~20 MB | MJPEG encoder — not yet implemented |
+| Streaming (active) | ~76 MB measured | `rpicam-vid` runs as its own child process (not just an in-process encoder as originally sketched); measured on a Pi 5, not yet on a Zero 2W |
 | Snapshots | ~5 MB | Per-request, released |
 | BLE listener | ~10 MB | Constant |
 | **Total idle, measured** | ~50 MB | Whole process (BLE + FastAPI/uvicorn), idle, measured on a Pi 5 running Python 3.13 — not yet measured on a Pi Zero 2W, but within the ~65 MB budget below |
 | **Total idle, original estimate** | ~65 MB | 12% of 512 MB RAM |
-| **Total streaming** | ~85 MB | 16% of 512 MB RAM — estimate, `/stream` not yet implemented |
+| **Total streaming, measured** | ~129 MB (53 MB main process + 76 MB `rpicam-vid`) | Measured on a Pi 5 (Python 3.13); not yet measured on a Zero 2W, but ~25% of 512 MB even at this combined figure |
+| **Total streaming, original estimate** | ~85 MB | 16% of 512 MB RAM |
 
 ### CPU Impact (Pi Zero 2W)
 
@@ -268,10 +280,10 @@ Continuous streaming may trigger CPU throttling on Pi Zero 2W after ~5-10 minute
 - [x] Add basic server startup in `run` command (`--web-port`)
 - [x] Write initial documentation
 
-### Phase 2 (Following)
-- [ ] Implement `/stream` with MJPEG encoder
-- [ ] Add timeout and auto-cleanup logic
-- [ ] Integrate with config system
+### Phase 2 (Following) — mostly done
+- [x] Implement `/stream` with MJPEG encoder (`rpicam-vid`, opt-in via `--enable-stream`, single-viewer-only)
+- [x] Add timeout and auto-cleanup logic (`stream_timeout_seconds`, disconnect detection, process cleanup on stop)
+- [x] Integrate with config system (`[profiles.<name>.server]`: `stream_resolution`, `stream_fps`, `jpeg_quality`, `stream_timeout_seconds`, `capture_mode`; `--stream-resolution`/`--stream-fps` CLI overrides for quick hardware-capability testing)
 - [ ] Add Home Assistant integration guide
 - [ ] Create troubleshooting docs
 
@@ -336,6 +348,14 @@ pip install -e ".[web]"
 # Enable the web server on port 8080, alongside the BLE listener
 bbl-shutter-cam run --profile my-printer --web-port 8080
 
+# Also enable the live MJPEG stream (opt-in, on top of --web-port)
+bbl-shutter-cam run --profile my-printer --web-port 8080 --enable-stream
+
+# Quickly test a different stream resolution/fps for this run only,
+# without touching the profile config
+bbl-shutter-cam run --profile my-printer --web-port 8080 --enable-stream \
+  --stream-resolution 1280x720 --stream-fps 20
+
 # Access the web UI
 open http://localhost:8080
 
@@ -345,12 +365,15 @@ curl http://raspberrypi.local:8080/snapshot > preview.jpg
 # Manually trigger a real capture (saved into the normal output sequence)
 curl -X POST http://raspberrypi.local:8080/capture
 
-# In Home Assistant, add to configuration.yaml — snapshot only for now;
-# stream_source needs /stream (Phase 2, not yet implemented)
+# View the live stream directly (requires --enable-stream)
+open http://raspberrypi.local:8080/stream
+
+# In Home Assistant, add to configuration.yaml
 camera:
   - platform: generic
     name: "My Printer"
     still_image_url: "http://raspberrypi.local:8080/snapshot"
+    stream_source: "http://raspberrypi.local:8080/stream"
 ```
 
 ---

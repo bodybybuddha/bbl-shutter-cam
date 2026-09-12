@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Minimal built-in web UI at `/`
   - New optional dependency group: `pip install bbl-shutter-cam[web]` (fastapi, uvicorn)
   - Camera access is now serialized via a shared lock so BLE-triggered and web-triggered captures can't collide
+- Live MJPEG streaming (Stage 4, Phase 2): `GET /stream`, opt-in separately via `--enable-stream` (requires `--web-port`)
+  - Backed by `rpicam-vid --codec mjpeg`; single viewer at a time (`409` if already in use), auto-stops on disconnect or `stream_timeout_seconds` (default 300s)
+  - Configurable via `[profiles.<name>.server]`: `stream_resolution`, `stream_fps`, `jpeg_quality`, `stream_timeout_seconds`, `capture_mode`; `--stream-resolution`/`--stream-fps` CLI overrides for testing different hardware capability levels on the same machine
+  - New `capture_mode` setting controls what happens when a BLE press or `/capture` lands while someone is watching the stream (rpicam-still and rpicam-vid can't share the camera): `"frame"` (default) instantly reuses the current stream frame at stream resolution with zero interruption; `"pause"` briefly stops the stream for a full-quality capture at the profile's normal resolution, then resumes it
+- Fixed a debounce bug in the BLE trigger handler: the very first shutter press after startup could be silently dropped if the event loop's monotonic clock happened to start below `min_interval_sec` (observed in sandboxed/containerized environments; low real-world risk on a normally-booted Pi, but a real edge case)
 
 ## [1.0.2] - 2026-02-15
 
