@@ -358,18 +358,20 @@ capture = false
 - Support for snapshot + stream URLs for flexible HA deployments
 
 ### Planned Tasks
-- [ ] Create `streaming.py` module (web server + stream handlers)
-- [ ] Add Flask/Werkzeug dependencies to `pyproject.toml`
+- [x] Create `streaming.py` module (web server + capture/snapshot handlers; MJPEG stream handler still pending)
+- [x] Add FastAPI/uvicorn dependencies as an optional `[web]` extra in `pyproject.toml` (chose FastAPI/uvicorn over Flask/Werkzeug — runs natively in the existing asyncio event loop alongside `bleak`, no bridging thread needed)
 - [ ] Extend `CameraConfig` dataclass with stream settings
-- [ ] Update `cli.py` to support `--web-port` flag on `run` command
-- [ ] Integrate Flask server with existing BLE listener in main loop
-- [ ] Build minimal HTML template for web UI
+- [x] Update `cli.py` to support `--web-port` flag on `run` command
+- [x] Integrate the web server with the existing BLE listener in the main loop (`asyncio.gather`)
+- [x] Build minimal HTML template for web UI
 - [ ] Create on-demand MJPEG generator with timeout logic
-- [ ] Add `/snapshot` and `/stream` endpoint handlers
+- [x] Add `/snapshot` endpoint handler
+- [x] Add `/capture` endpoint handler (manual/Home Assistant-triggered capture, saved into the normal numbered sequence; camera access serialized against BLE-triggered captures via a shared lock)
+- [ ] Add `/stream` endpoint handler
 - [ ] Update config schema with `[server]` section examples
 - [ ] Write comprehensive Home Assistant integration guide
 - [ ] Document stream architecture and resource usage
-- [ ] Add integration tests for streaming endpoints
+- [x] Add tests for streaming endpoints (`tests/test_streaming.py`)
 - [ ] Update systemd service template with streaming examples
 - [ ] Create troubleshooting guide for streaming connectivity issues
 

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Optional web server (Stage 4, Phase 1): `--web-port` flag on `run` starts a FastAPI/uvicorn server alongside the BLE listener in the same asyncio event loop
+  - `GET /snapshot`: on-demand preview JPEG, overwrites a single file rather than growing the time-lapse archive
+  - `POST /capture`: manually trigger a real capture, saved into the same numbered sequence as a Bluetooth-triggered photo (for testing and Home Assistant automations)
+  - Minimal built-in web UI at `/`
+  - New optional dependency group: `pip install bbl-shutter-cam[web]` (fastapi, uvicorn)
+  - Camera access is now serialized via a shared lock so BLE-triggered and web-triggered captures can't collide
+
 ## [1.0.2] - 2026-02-15
 
 ### Changed

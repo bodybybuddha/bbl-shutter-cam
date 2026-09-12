@@ -2,9 +2,9 @@
 
 ## Overview
 
-Web streaming and Home Assistant integration is a **planned feature** for bbl-shutter-cam that enables remote monitoring of your Raspberry Pi camera via a web interface and integration with Home Assistant. This allows you to view live camera feeds and remote snapshots while maintaining the **Bluetooth shutter as the primary trigger** for reliable time-lapse capture.
+Web streaming and Home Assistant integration is a feature for bbl-shutter-cam that enables remote monitoring of your Raspberry Pi camera via a web interface and integration with Home Assistant. This allows you to view live camera feeds and remote snapshots while maintaining the **Bluetooth shutter as the primary trigger** for reliable time-lapse capture.
 
-**Status**: Planned for Stage 4 (post-v1.0.0)  
+**Status**: Phase 1 implemented (`/snapshot`, `/capture`, minimal web UI, `--web-port` flag). Live MJPEG `/stream` (Phase 2) and full Home Assistant docs/MQTT (Phase 3) are still planned.
 **Target Device**: Raspberry Pi Zero 2W (and larger models)
 
 ---
@@ -37,8 +37,10 @@ The web server and Bluetooth listener run in the **same systemd service**:
 bbl-shutter-cam run --profile my-printer --web-port 8080
     ↓
     └─ BLE listener (always active)
-    └─ Flask web server (optional, if --web-port specified)
+    └─ FastAPI/uvicorn web server (optional, if --web-port specified)
 ```
+
+Both run in the same asyncio event loop (`asyncio.gather`) — FastAPI/uvicorn was chosen over Flask specifically because the BLE listener is already fully async (`bleak`), so the web server can share that loop natively instead of needing a separate thread to bridge a synchronous WSGI framework in.
 
 This keeps the deployment simple and reduces resource overhead compared to separate services.
 
@@ -52,17 +54,18 @@ Physical shutter press → BLE signal → rpicam-still capture → photo saved
 - Best for time-lapse sequences
 - Zero software latency
 
-**Path 2: Web UI or Home Assistant (Secondary)**
+**Path 2: Web UI or Home Assistant (Secondary)** ✅ Implemented
 ```
-Web button click → Flask endpoint → rpicam-still capture → JPEG response
+Web button click → FastAPI endpoint → rpicam-still capture → JPEG response
 ```
 - Useful for manual testing and verification
 - Requires network connectivity
 - Slightly higher latency (~1-2 seconds)
+- Serialized against BLE-triggered captures via a shared lock, so the two paths can't collide on the camera device
 
-**Path 3: Streaming (Preview Only)**
+**Path 3: Streaming (Preview Only)** — not yet implemented
 ```
-User accesses /stream → Flask starts MJPEG encoder → Live feed streamed
+User accesses /stream → FastAPI starts MJPEG encoder → Live feed streamed
 ```
 - Preview only, not for capture
 - Auto-stops on disconnect or timeout
@@ -74,11 +77,11 @@ User accesses /stream → Flask starts MJPEG encoder → Live feed streamed
 
 ### 1. HTTP API Endpoints
 
-#### `/snapshot` Endpoint
+#### `/snapshot` Endpoint ✅ Implemented
 - **Purpose**: Fetch a single JPEG image on demand
 - **Method**: GET
 - **Response**: Raw JPEG data
-- **Overhead**: Minimal; no continuous encoding
+- **Overhead**: Minimal; no continuous encoding. Overwrites one file (`<output_dir>/web/snapshot.jpg`) rather than adding to the time-lapse archive.
 - **Use**: Home Assistant snapshots, manual verification
 - **Example**: 
   ```bash
@@ -98,11 +101,11 @@ User accesses /stream → Flask starts MJPEG encoder → Live feed streamed
   <img src="http://raspberrypi.local:8080/stream" width="640" height="480" />
   ```
 
-#### `/capture` Endpoint (Manual Trigger)
+#### `/capture` Endpoint (Manual Trigger) ✅ Implemented
 - **Purpose**: Manually trigger photo capture via web/Home Assistant
 - **Method**: POST
 - **Response**: JPEG of just-captured image
-- **Use**: Testing camera settings, manual verification during setup
+- **Use**: Testing camera settings, manual verification during setup. Unlike `/snapshot`, this saves into the same numbered `<output_dir>/` sequence as a real Bluetooth-triggered capture.
 - **Example**:
   ```bash
   curl -X POST http://raspberrypi.local:8080/capture
@@ -190,12 +193,13 @@ The service provides:
 | Component | Usage | Notes |
 |-----------|-------|-------|
 | Python runtime | ~30 MB | Base interpreter |
-| Flask server | ~15 MB | Idle, listening |
-| Streaming (active) | ~20 MB | MJPEG encoder |
+| FastAPI/uvicorn server | ~15-20 MB | Idle, listening |
+| Streaming (active) | ~20 MB | MJPEG encoder — not yet implemented |
 | Snapshots | ~5 MB | Per-request, released |
 | BLE listener | ~10 MB | Constant |
-| **Total idle** | ~65 MB | 12% of 512 MB RAM |
-| **Total streaming** | ~85 MB | 16% of 512 MB RAM |
+| **Total idle, measured** | ~50 MB | Whole process (BLE + FastAPI/uvicorn), idle, measured on a Pi 5 running Python 3.13 — not yet measured on a Pi Zero 2W, but within the ~65 MB budget below |
+| **Total idle, original estimate** | ~65 MB | 12% of 512 MB RAM |
+| **Total streaming** | ~85 MB | 16% of 512 MB RAM — estimate, `/stream` not yet implemented |
 
 ### CPU Impact (Pi Zero 2W)
 
@@ -256,12 +260,13 @@ Continuous streaming may trigger CPU throttling on Pi Zero 2W after ~5-10 minute
 
 ## Implementation Timeline
 
-### Phase 1 (Immediate)
-- [ ] Create `streaming.py` module
-- [ ] Implement `/snapshot` endpoint
-- [ ] Build simple HTML web UI
-- [ ] Add basic server startup in `run` command
-- [ ] Write initial documentation
+### Phase 1 (Immediate) ✅ Done
+- [x] Create `streaming.py` module
+- [x] Implement `/snapshot` endpoint
+- [x] Implement `/capture` endpoint (moved up from later phases — needed for manual/Home Assistant-triggered capture alongside the BLE trigger)
+- [x] Build simple HTML web UI
+- [x] Add basic server startup in `run` command (`--web-port`)
+- [x] Write initial documentation
 
 ### Phase 2 (Following)
 - [ ] Implement `/stream` with MJPEG encoder
@@ -322,21 +327,30 @@ Potential improvements after initial release:
 
 ---
 
-## Getting Started (When Available)
+## Getting Started
 
 ```bash
-# Enable streaming on default port 8080
+# Install the optional web extra (fastapi + uvicorn)
+pip install -e ".[web]"
+
+# Enable the web server on port 8080, alongside the BLE listener
 bbl-shutter-cam run --profile my-printer --web-port 8080
 
 # Access the web UI
 open http://localhost:8080
 
-# In Home Assistant, add to configuration.yaml
+# On-demand snapshot (preview, not added to the time-lapse archive)
+curl http://raspberrypi.local:8080/snapshot > preview.jpg
+
+# Manually trigger a real capture (saved into the normal output sequence)
+curl -X POST http://raspberrypi.local:8080/capture
+
+# In Home Assistant, add to configuration.yaml — snapshot only for now;
+# stream_source needs /stream (Phase 2, not yet implemented)
 camera:
   - platform: generic
     name: "My Printer"
     still_image_url: "http://raspberrypi.local:8080/snapshot"
-    stream_source: "http://raspberrypi.local:8080/stream"
 ```
 
 ---

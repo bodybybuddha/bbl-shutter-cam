@@ -17,6 +17,7 @@ import sys
 from pathlib import Path
 
 from . import discover, tune
+from .camera import camera_config_from_profile
 from .config import DEFAULT_CONFIG_PATH, ensure_config_exists, load_profile
 from .util import LOG, configure_logging
 
@@ -113,6 +114,13 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--verbose", action="store_true", help="Print BLE notification payloads")
     run.add_argument(
         "--reconnect-delay", type=float, default=2.0, help="Seconds between reconnect attempts"
+    )
+    run.add_argument(
+        "--web-port",
+        type=int,
+        default=None,
+        help="Enable the optional web server (snapshot/manual capture) on this port. "
+        "Disabled by default. Requires: pip install bbl-shutter-cam[web]",
     )
     run.set_defaults(func=_cmd_run)
 
@@ -288,6 +296,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
             - dry_run: If True, logs triggers but doesn't capture photos
             - verbose: Whether to print BLE notification payloads
             - reconnect_delay: Seconds between reconnection attempts
+            - web_port: If set, also runs the optional web server on this port
 
     Returns:
         0 on normal exit, 1 on error (typically not reached due to Ctrl+C).
@@ -296,14 +305,33 @@ def _cmd_run(args: argparse.Namespace) -> int:
     ensure_config_exists(cfg_path)
 
     prof = load_profile(cfg_path, args.profile)
-    asyncio.run(
-        discover.run_profile(
-            prof,
-            dry_run=args.dry_run,
-            verbose=args.verbose,
-            reconnect_delay=args.reconnect_delay,
-        )
+
+    ble_coro = discover.run_profile(
+        prof,
+        dry_run=args.dry_run,
+        verbose=args.verbose,
+        reconnect_delay=args.reconnect_delay,
     )
+
+    if not args.web_port:
+        asyncio.run(ble_coro)
+        return 0
+
+    try:
+        from . import streaming
+    except ImportError as e:
+        LOG.error(str(e))
+        return 1
+
+    async def _run_with_web() -> None:
+        cam_cfg = camera_config_from_profile(prof)
+        app = streaming.create_app(cam_cfg)
+        await asyncio.gather(
+            ble_coro,
+            streaming.run_server(app, "0.0.0.0", args.web_port),
+        )
+
+    asyncio.run(_run_with_web())
     return 0
 
 

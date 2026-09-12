@@ -140,7 +140,49 @@ def test_cmd_run_invokes_discover(monkeypatch, tmp_path):
         dry_run=True,
         verbose=False,
         reconnect_delay=0.1,
+        web_port=None,
     )
     rc = cli._cmd_run(args)
 
     assert rc == 0
+
+
+def test_cmd_run_with_web_port_runs_both(monkeypatch, tmp_path):
+    """When --web-port is set, both the BLE loop and the web server should run."""
+    calls = []
+
+    async def fake_run_profile(*_args, **_kwargs):
+        calls.append("ble")
+
+    async def fake_run_server(_app, _host, _port):
+        calls.append("web")
+
+    monkeypatch.setattr(cli, "ensure_config_exists", lambda _path: None)
+    monkeypatch.setattr(
+        cli,
+        "load_profile",
+        lambda _path, _name: {"device": {"mac": "AA:BB", "notify_uuid": "uuid"}},
+    )
+    monkeypatch.setattr(cli.discover, "run_profile", fake_run_profile)
+
+    # cli._cmd_run does a function-local `from . import streaming`, which
+    # resolves via the bbl_shutter_cam package's `streaming` attribute once
+    # the real module has been imported anywhere (e.g. by test_streaming.py
+    # at collection time) - patching sys.modules alone doesn't intercept
+    # that. Patch the real module's functions in place instead.
+    streaming = pytest.importorskip("bbl_shutter_cam.streaming")
+    monkeypatch.setattr(streaming, "create_app", lambda _cam_cfg: object())
+    monkeypatch.setattr(streaming, "run_server", fake_run_server)
+
+    args = argparse.Namespace(
+        config=tmp_path / "config.toml",
+        profile="office",
+        dry_run=True,
+        verbose=False,
+        reconnect_delay=0.1,
+        web_port=8080,
+    )
+    rc = cli._cmd_run(args)
+
+    assert rc == 0
+    assert set(calls) == {"ble", "web"}

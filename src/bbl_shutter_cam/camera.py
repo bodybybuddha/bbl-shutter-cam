@@ -11,10 +11,18 @@ All camera settings are exposed as configuration options with sensible defaults.
 
 from __future__ import annotations
 
+import asyncio
+import subprocess
+import threading
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# Serializes access to the physical camera device across the BLE-triggered
+# capture path and any web-triggered capture (e.g. streaming.py), since
+# rpicam-still can only use the camera exclusively.
+CAMERA_LOCK = threading.Lock()
 
 
 @dataclass(frozen=True)
@@ -248,3 +256,63 @@ def build_rpicam_still_cmd(cam: CameraConfig, outfile: str) -> List[str]:
     if cam.timeout is not None:
         cmd += ["--timeout", str(cam.timeout)]
     return cmd
+
+
+def capture_still_sync(cam: CameraConfig) -> str:
+    """Capture a photo into the profile's normal numbered output sequence.
+
+    Blocks the calling thread for the duration of the capture. Serializes
+    against other callers via CAMERA_LOCK so a web-triggered capture can't
+    collide with a BLE-triggered one.
+
+    Args:
+        cam: CameraConfig with capture parameters
+
+    Returns:
+        str: Path to the captured JPEG.
+
+    Raises:
+        subprocess.CalledProcessError: If rpicam-still fails.
+    """
+    outfile = make_outfile(cam)
+    cmd = build_rpicam_still_cmd(cam, outfile)
+    with CAMERA_LOCK:
+        subprocess.run(cmd, check=True, capture_output=True)
+    return outfile
+
+
+def capture_preview_sync(cam: CameraConfig) -> str:
+    """Capture a lightweight preview snapshot, overwriting the same file each time.
+
+    Unlike capture_still_sync(), this does not add a new file to the profile's
+    numbered capture sequence — it's meant for on-demand web preview, not
+    for the time-lapse archive.
+
+    Args:
+        cam: CameraConfig with capture parameters
+
+    Returns:
+        str: Path to the (overwritten) preview JPEG.
+
+    Raises:
+        subprocess.CalledProcessError: If rpicam-still fails.
+    """
+    out_dir = Path(cam.output_dir).expanduser() / "web"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    outfile = str(out_dir / "snapshot.jpg")
+    cmd = build_rpicam_still_cmd(cam, outfile)
+    with CAMERA_LOCK:
+        subprocess.run(cmd, check=True, capture_output=True)
+    return outfile
+
+
+async def capture_still(cam: CameraConfig) -> str:
+    """Async wrapper for capture_still_sync(); runs in a worker thread so it
+    doesn't block the event loop (and thus the BLE listener) for the
+    several seconds a capture takes."""
+    return await asyncio.to_thread(capture_still_sync, cam)
+
+
+async def capture_preview(cam: CameraConfig) -> str:
+    """Async wrapper for capture_preview_sync(); see capture_still()."""
+    return await asyncio.to_thread(capture_preview_sync, cam)

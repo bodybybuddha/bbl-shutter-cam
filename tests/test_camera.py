@@ -3,16 +3,21 @@
 Tests camera configuration, command building, and file management.
 """
 
+import asyncio
 import tempfile
 from datetime import datetime
 from pathlib import Path
 
 import pytest
 
+from bbl_shutter_cam import camera
 from bbl_shutter_cam.camera import (
     CameraConfig,
     build_rpicam_still_cmd,
     camera_config_from_profile,
+    capture_preview_sync,
+    capture_still,
+    capture_still_sync,
     make_outfile,
 )
 
@@ -385,3 +390,93 @@ class TestMakeOutfile:
         make_outfile(config)
 
         assert nested_dir.exists()
+
+
+class TestCaptureStillSync:
+    """Test capture_still_sync() function."""
+
+    def test_calls_rpicam_still_and_returns_path(self, tmp_path, monkeypatch):
+        """Should build the command, run it, and return the output path."""
+        calls = []
+        monkeypatch.setattr(camera.subprocess, "run", lambda cmd, **kw: calls.append((cmd, kw)))
+
+        config = CameraConfig(output_dir=str(tmp_path), filename_format="test.jpg")
+        outfile = capture_still_sync(config)
+
+        assert outfile == str(tmp_path / "test.jpg")
+        assert len(calls) == 1
+        cmd, kwargs = calls[0]
+        assert cmd[0] == "rpicam-still"
+        assert outfile in cmd
+        assert kwargs.get("check") is True
+
+    def test_propagates_subprocess_errors(self, tmp_path, monkeypatch):
+        """Should let CalledProcessError bubble up on capture failure."""
+        import subprocess
+
+        def fake_run(cmd, **kw):
+            raise subprocess.CalledProcessError(1, cmd)
+
+        monkeypatch.setattr(camera.subprocess, "run", fake_run)
+
+        config = CameraConfig(output_dir=str(tmp_path))
+        with pytest.raises(subprocess.CalledProcessError):
+            capture_still_sync(config)
+
+
+class TestCapturePreviewSync:
+    """Test capture_preview_sync() function."""
+
+    def test_writes_to_fixed_web_subdir(self, tmp_path, monkeypatch):
+        """Should always use <output_dir>/web/snapshot.jpg, not a timestamped name."""
+        monkeypatch.setattr(camera.subprocess, "run", lambda cmd, **kw: None)
+
+        config = CameraConfig(output_dir=str(tmp_path))
+        outfile = capture_preview_sync(config)
+
+        assert outfile == str(tmp_path / "web" / "snapshot.jpg")
+        assert (tmp_path / "web").is_dir()
+
+    def test_overwrites_same_file_on_repeat_calls(self, tmp_path, monkeypatch):
+        """Repeated preview captures should reuse one path, not accumulate files."""
+        monkeypatch.setattr(camera.subprocess, "run", lambda cmd, **kw: None)
+
+        config = CameraConfig(output_dir=str(tmp_path))
+        first = capture_preview_sync(config)
+        second = capture_preview_sync(config)
+
+        assert first == second
+        assert len(list((tmp_path / "web").iterdir())) == 0  # subprocess is faked, no real file
+
+
+class TestCaptureAsyncWrappers:
+    """Test the async capture_still()/capture_preview() wrappers."""
+
+    def test_capture_still_runs_in_thread_and_returns_path(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(camera.subprocess, "run", lambda cmd, **kw: None)
+
+        config = CameraConfig(output_dir=str(tmp_path), filename_format="async.jpg")
+        outfile = asyncio.run(capture_still(config))
+
+        assert outfile == str(tmp_path / "async.jpg")
+
+    def test_capture_still_uses_shared_lock(self, tmp_path, monkeypatch):
+        """Concurrent async captures should not run rpicam-still concurrently."""
+        in_flight = []
+        max_concurrent = []
+
+        def fake_run(cmd, **kw):
+            in_flight.append(1)
+            max_concurrent.append(len(in_flight))
+            in_flight.pop()
+
+        monkeypatch.setattr(camera.subprocess, "run", fake_run)
+
+        config = CameraConfig(output_dir=str(tmp_path))
+
+        async def run_two():
+            await asyncio.gather(capture_still(config), capture_still(config))
+
+        asyncio.run(run_two())
+
+        assert max(max_concurrent) == 1

@@ -19,7 +19,7 @@ from typing import Any, Dict, Optional, Tuple
 from bleak import BleakScanner
 
 from . import ble
-from .camera import build_rpicam_still_cmd, camera_config_from_profile, make_outfile
+from .camera import CAMERA_LOCK, build_rpicam_still_cmd, camera_config_from_profile, make_outfile
 from .config import update_profile_device_fields
 from .util import LOG
 
@@ -320,7 +320,8 @@ async def run_profile(
                     LOG.debug(f"Capture cmd: {' '.join(cmd)}")
 
                     try:
-                        subprocess.run(cmd, check=True)
+                        with CAMERA_LOCK:
+                            subprocess.run(cmd, check=True)
                         LOG.info(f"Captured: {outfile}")
                     except subprocess.CalledProcessError as e:
                         LOG.error(f"rpicam-still failed: {e}")
