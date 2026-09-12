@@ -122,13 +122,17 @@ exclude = [
   "^dist/",
 ]
 
-# anyio (a transitive dependency of the optional fastapi/uvicorn "web"
-# extra) ships py.typed and uses match statements in its own source. With
-# python_version pinned to 3.9 above, mypy parses everything - including
-# third-party library internals it follows imports into - as 3.9 syntax,
-# which fails on anyio's match statements on some resolved anyio versions.
-# We don't need mypy to check inside anyio itself, just how we use it
-# (indirectly, via fastapi/starlette).
+# Some third-party dependencies pulled in by the optional "web" extra ship
+# py.typed and use match statements in their own source. With
+# python_version pinned to 3.9 above, mypy parses everything it follows
+# imports into - including third-party library internals - as 3.9 syntax,
+# which fails on any of them using 3.10+ syntax internally. We only need
+# mypy to check our own code, not these libraries' internals - but a
+# blanket `follow_imports = "skip"` (tried first) throws away real type
+# information from libraries we DO want checked against (tomlkit, bleak),
+# producing new errors and stale `type: ignore`s elsewhere. So this is
+# scoped to just the packages that have actually tripped this, added to
+# as needed rather than applied globally.
 [[tool.mypy.overrides]]
-module = "anyio.*"
+module = ["anyio.*", "click.*"]
 follow_imports = "skip"
