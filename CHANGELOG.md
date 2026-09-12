@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New `capture_mode` setting controls what happens when a BLE press or `/capture` lands while someone is watching the stream (rpicam-still and rpicam-vid can't share the camera): `"frame"` (default) instantly reuses the current stream frame at stream resolution with zero interruption; `"pause"` briefly stops the stream for a full-quality capture at the profile's normal resolution, then resumes it
 - Fixed a debounce bug in the BLE trigger handler: the very first shutter press after startup could be silently dropped if the event loop's monotonic clock happened to start below `min_interval_sec` (observed in sandboxed/containerized environments; low real-world risk on a normally-booted Pi, but a real edge case)
 
+### Changed
+- **Breaking:** minimum supported Python bumped from 3.9 to **3.11**. Matches what Raspberry Pi OS Bookworm (the documented recommended install target) ships by default, and fixes a class of mypy CI failures where third-party dependencies pulled in by the new `[web]` extra use `match` statements (3.10+ syntax) that failed to parse under the old, older `python_version` target. Older installs on Bullseye-era Python 3.9/3.10 need to upgrade Python (or stay on v1.0.2) before updating.
+
 ## [1.0.2] - 2026-02-15
 
 ### Changed
