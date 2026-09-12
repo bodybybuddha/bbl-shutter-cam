@@ -7,7 +7,7 @@ name = "bbl-shutter-cam"
 version = "1.0.2"
 description = "Use a Bambu Cyberbrick BBL_SHUTTER BLE trigger to capture photos on Raspberry Pi (rpicam-still)."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Casa Taylor" }]
 keywords = ["raspberry-pi", "bluetooth", "ble", "timelapse", "bambu", "rpicam"]
@@ -18,8 +18,6 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -63,7 +61,7 @@ where = ["src"]
 
 [tool.black]
 line-length = 100
-target-version = ["py39", "py310", "py311", "py312"]
+target-version = ["py311", "py312", "py313"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -105,7 +103,7 @@ max-line-length = 100
 max-attributes = 10
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -121,18 +119,3 @@ exclude = [
   "^build/",
   "^dist/",
 ]
-
-# Some third-party dependencies pulled in by the optional "web" extra ship
-# py.typed and use match statements in their own source. With
-# python_version pinned to 3.9 above, mypy parses everything it follows
-# imports into - including third-party library internals - as 3.9 syntax,
-# which fails on any of them using 3.10+ syntax internally. We only need
-# mypy to check our own code, not these libraries' internals - but a
-# blanket `follow_imports = "skip"` (tried first) throws away real type
-# information from libraries we DO want checked against (tomlkit, bleak),
-# producing new errors and stale `type: ignore`s elsewhere. So this is
-# scoped to just the packages that have actually tripped this, added to
-# as needed rather than applied globally.
-[[tool.mypy.overrides]]
-module = ["anyio.*", "click.*"]
-follow_imports = "skip"

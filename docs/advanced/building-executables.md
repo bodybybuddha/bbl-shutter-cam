@@ -8,7 +8,7 @@ PyInstaller packages your Python application into a single executable that doesn
 
 ## Prerequisites
 
-1. **Python 3.9+** installed
+1. **Python 3.11+** installed
 2. **PyInstaller** (installed as part of dev dependencies)
 
 ## Quick Start

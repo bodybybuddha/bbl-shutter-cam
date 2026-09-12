@@ -227,8 +227,8 @@ python -m pytest tests/ -v          # Run tests
 | Component | Minimum | Recommended |
 |-----------|---------|-------------|
 | **Raspberry Pi** | Pi 3B+ | Pi Zero 2 W or Pi 5 |
-| **OS** | Bullseye | Bookworm (Lite) |
-| **Python** | 3.9 | 3.11+ |
+| **OS** | Bookworm (Lite) | Bookworm (Lite) |
+| **Python** | 3.11 | 3.11+ |
 | **Camera** | libcamera compatible | Pi Camera Module 3 |
 | **Bluetooth** | Built-in/USB adapter | Built-in module |
 

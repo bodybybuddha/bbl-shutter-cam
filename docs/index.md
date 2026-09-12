@@ -103,7 +103,7 @@ sftp pi@raspberrypi.local
 
 **Software:**
 - Raspberry Pi OS Lite (Bookworm recommended)
-- Python 3.9+
+- Python 3.11+
 - `rpicam-still` (included with latest Raspberry Pi OS)
 
 [→ Full hardware guide](installation/requirements.md)
