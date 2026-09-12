@@ -121,3 +121,14 @@ exclude = [
   "^build/",
   "^dist/",
 ]
+
+# anyio (a transitive dependency of the optional fastapi/uvicorn "web"
+# extra) ships py.typed and uses match statements in its own source. With
+# python_version pinned to 3.9 above, mypy parses everything - including
+# third-party library internals it follows imports into - as 3.9 syntax,
+# which fails on anyio's match statements on some resolved anyio versions.
+# We don't need mypy to check inside anyio itself, just how we use it
+# (indirectly, via fastapi/starlette).
+[[tool.mypy.overrides]]
+module = "anyio.*"
+follow_imports = "skip"
