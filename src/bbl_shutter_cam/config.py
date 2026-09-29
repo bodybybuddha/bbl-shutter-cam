@@ -61,12 +61,12 @@ def ensure_config_exists(path: Path = DEFAULT_CONFIG_PATH) -> None:
     cfg["profiles"] = document()
 
     # Minimal default profile
-    cfg["profiles"]["default"] = document()  # type: ignore[index]
-    cfg["profiles"]["default"]["device"] = {  # type: ignore[index]
+    cfg["profiles"]["default"] = document()
+    cfg["profiles"]["default"]["device"] = {
         "name": "BBL_SHUTTER",
         # mac and notify_uuid learned during setup
     }
-    cfg["profiles"]["default"]["camera"] = {  # type: ignore[index]
+    cfg["profiles"]["default"]["camera"] = {
         "output_dir": str(Path.home() / "captures" / "default"),
         "filename_format": "%Y%m%d_%H%M%S.jpg",
         "min_interval_sec": 0.5,
