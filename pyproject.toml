@@ -35,7 +35,7 @@ web = [
   "uvicorn>=0.30,<1.0",
 ]
 dev = [
-  "pytest>=7.0,<9",
+  "pytest>=7.0,<10",
   "pytest-cov>=4.0,<8",
   "black>=23.0,<26",
   "pylint>=3.0,<4",
