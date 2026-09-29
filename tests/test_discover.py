@@ -1,6 +1,9 @@
 """Unit tests for discover.py module."""
 
 import asyncio
+import os
+import signal
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -197,3 +200,42 @@ def test_run_profile_captures_on_trigger(monkeypatch):
     asyncio.run(discover.run_profile(profile, dry_run=False))
 
     assert captured == ["frame"]
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="add_signal_handler is Unix-only")
+def test_run_profile_disconnects_cleanly_on_sigterm(monkeypatch):
+    """A real SIGTERM (what `systemctl stop`/`kill` send) must still call
+    client.disconnect(), not just KeyboardInterrupt (Ctrl+C)."""
+    disconnect_called = []
+
+    class FakeClient:
+        def __init__(self):
+            self.is_connected = True
+
+        async def start_notify(self, _uuid, _callback):
+            return None
+
+        async def disconnect(self):
+            disconnect_called.append(True)
+            self.is_connected = False
+
+    async def fake_connect(_mac, reconnect_delay=2.0):
+        return FakeClient()
+
+    monkeypatch.setattr(discover.ble, "connect_with_retry", fake_connect)
+
+    profile = {
+        "_profile_name": "office",
+        "device": {"mac": "AA:BB", "notify_uuid": "uuid-1", "events": []},
+        "camera": {"output_dir": "/tmp", "rpicam": {"width": 1920, "height": 1080}},
+    }
+
+    async def run_and_signal():
+        task = asyncio.ensure_future(discover.run_profile(profile, dry_run=True))
+        await asyncio.sleep(0.05)  # let run_profile connect and register signal handlers
+        os.kill(os.getpid(), signal.SIGTERM)
+        await asyncio.wait_for(task, timeout=2.0)
+
+    asyncio.run(run_and_signal())
+
+    assert disconnect_called == [True]

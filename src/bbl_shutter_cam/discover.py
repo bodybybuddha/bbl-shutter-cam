@@ -13,6 +13,7 @@ core photo capture functionality.
 from __future__ import annotations
 
 import asyncio
+import signal
 import subprocess
 from typing import Any, Dict, Optional, Tuple
 
@@ -241,7 +242,8 @@ async def run_profile(
         SystemExit: If profile is missing required fields (MAC, notify_uuid)
 
     Note:
-        This function runs indefinitely. Press Ctrl+C to stop.
+        This function runs indefinitely. Press Ctrl+C to stop, or send
+        SIGTERM (e.g. `systemctl stop`) for the same clean shutdown.
         Will automatically reconnect if the device disconnects.
 
     Example:
@@ -288,58 +290,82 @@ async def run_profile(
     if dry_run:
         LOG.warning("Dry-run enabled: no photos will be taken.")
 
-    while True:
-        client = None
+    # SIGTERM (what `systemctl stop` sends) has no default Python exception
+    # handler, unlike Ctrl+C's SIGINT (KeyboardInterrupt) — without this, a
+    # stopped service skips client.disconnect() entirely and can leave BlueZ
+    # believing it's still connected, breaking the next connection attempt.
+    stop_event = asyncio.Event()
+    loop = asyncio.get_running_loop()
+    registered_signals = []
+    for sig in (signal.SIGTERM, signal.SIGINT):
         try:
-            LOG.info("Connecting…")
-            client = await ble.connect_with_retry(mac, reconnect_delay=reconnect_delay)
-            LOG.info("Connected; subscribing to notifications…")
+            loop.add_signal_handler(sig, stop_event.set)
+            registered_signals.append(sig)
+        except NotImplementedError:
+            # Not available on some platforms (e.g. Windows); Ctrl+C still
+            # works there via the KeyboardInterrupt fallback below.
+            pass
 
-            def on_notify(_sender: int, data: bytearray):
-                nonlocal last_press
-                b = bytes(data)
+    try:
+        while not stop_event.is_set():
+            client = None
+            try:
+                LOG.info("Connecting…")
+                client = await ble.connect_with_retry(mac, reconnect_delay=reconnect_delay)
+                LOG.info("Connected; subscribing to notifications…")
 
-                if verbose:
-                    print(f"[notify] {b.hex()}")
+                def on_notify(_sender: int, data: bytearray):
+                    nonlocal last_press
+                    b = bytes(data)
 
-                # Check if this is a configured trigger event
-                if b in trigger_map:
-                    now = asyncio.get_event_loop().time()
-                    if last_press is not None and now - last_press < min_interval:
-                        LOG.debug("Debounced press (too soon).")
-                        return
-                    last_press = now
+                    if verbose:
+                        print(f"[notify] {b.hex()}")
 
-                    event = trigger_map[b]
-                    event_name = event.get("name", b.hex())
-                    LOG.info(f"SHUTTER PRESS ({event_name}) {b.hex()}")
-                    if dry_run:
-                        return
+                    # Check if this is a configured trigger event
+                    if b in trigger_map:
+                        now = asyncio.get_event_loop().time()
+                        if last_press is not None and now - last_press < min_interval:
+                            LOG.debug("Debounced press (too soon).")
+                            return
+                        last_press = now
 
+                        event = trigger_map[b]
+                        event_name = event.get("name", b.hex())
+                        LOG.info(f"SHUTTER PRESS ({event_name}) {b.hex()}")
+                        if dry_run:
+                            return
+
+                        try:
+                            outfile = capture_still_sync(cam_cfg, capture_mode=stream_capture_mode)
+                            LOG.info(f"Captured: {outfile}")
+                        except subprocess.CalledProcessError as e:
+                            LOG.error(f"rpicam-still failed: {e}")
+
+                await client.start_notify(notify_uuid, on_notify)  # type: ignore[arg-type]
+                LOG.info("Listening… (Ctrl+C to quit)")
+
+                while client.is_connected and not stop_event.is_set():
+                    await asyncio.sleep(0.5)
+
+                if not stop_event.is_set():
+                    LOG.warning("Disconnected; will reconnect…")
+            except KeyboardInterrupt:
+                LOG.info("Exiting.")
+                return
+            except Exception as e:
+                LOG.error(f"{e.__class__.__name__}: {e}")
+            finally:
+                if client:
                     try:
-                        outfile = capture_still_sync(cam_cfg, capture_mode=stream_capture_mode)
-                        LOG.info(f"Captured: {outfile}")
-                    except subprocess.CalledProcessError as e:
-                        LOG.error(f"rpicam-still failed: {e}")
+                        await client.disconnect()
+                    except Exception:
+                        pass
 
-            await client.start_notify(notify_uuid, on_notify)  # type: ignore[arg-type]
-            LOG.info("Listening… (Ctrl+C to quit)")
-
-            while client.is_connected:
-                await asyncio.sleep(0.5)
-
-            LOG.warning("Disconnected; will reconnect…")
-        except KeyboardInterrupt:
-            LOG.info("Exiting.")
-            return
-        except Exception as e:
-            LOG.error(f"{e.__class__.__name__}: {e}")
-        finally:
-            if client:
-                try:
-                    await client.disconnect()
-                except Exception:
-                    pass
+        if stop_event.is_set():
+            LOG.info("Shutdown signal received; disconnected cleanly.")
+    finally:
+        for sig in registered_signals:
+            loop.remove_signal_handler(sig)
 
 
 async def debug_signals(
