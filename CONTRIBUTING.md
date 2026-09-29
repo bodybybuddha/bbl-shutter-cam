@@ -27,7 +27,7 @@ This project is committed to providing a welcoming and inspiring community for a
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.11+
 - Git
 - A terminal/command prompt
 
@@ -155,9 +155,9 @@ python -m mypy src/bbl_shutter_cam/
 
 This project follows **PEP 8** style guidelines enforced by tool configurations in `pyproject.toml`:
 
-- **Black** - Code formatter (100 character line length, Python 3.9-3.13)
+- **Black** - Code formatter (100 character line length, Python 3.11-3.13)
 - **Pylint** - Style and error checking (customized for CLI applications)
-- **mypy** - Static type checking (Python 3.9 baseline)
+- **mypy** - Static type checking (Python 3.11 baseline)
 - **.editorconfig** - Cross-IDE formatting consistency (UTF-8, LF endings, proper indentation)
 
 ### Tool Configuration

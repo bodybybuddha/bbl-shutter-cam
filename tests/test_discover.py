@@ -171,20 +171,15 @@ def test_run_profile_captures_on_trigger(monkeypatch):
     async def fake_sleep(_duration):
         return None
 
-    def fake_make_outfile(_cfg):
+    captured = []
+
+    def fake_capture_still_sync(_cfg, capture_mode="frame"):
+        captured.append(capture_mode)
         return "/tmp/out.jpg"
-
-    def fake_build_cmd(_cfg, outfile):
-        return ["rpicam-still", "-o", outfile]
-
-    def fake_run(_cmd, check=True):
-        return None
 
     monkeypatch.setattr(discover.ble, "connect_with_retry", fake_connect)
     monkeypatch.setattr(discover.asyncio, "sleep", fake_sleep)
-    monkeypatch.setattr(discover, "make_outfile", fake_make_outfile)
-    monkeypatch.setattr(discover, "build_rpicam_still_cmd", fake_build_cmd)
-    monkeypatch.setattr(discover.subprocess, "run", fake_run)
+    monkeypatch.setattr(discover, "capture_still_sync", fake_capture_still_sync)
 
     profile = {
         "_profile_name": "office",
@@ -200,3 +195,5 @@ def test_run_profile_captures_on_trigger(monkeypatch):
     }
 
     asyncio.run(discover.run_profile(profile, dry_run=False))
+
+    assert captured == ["frame"]

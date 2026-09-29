@@ -95,9 +95,9 @@ parent: Installation
 3. Configure: WiFi, hostname, username/password
 4. Write to microSD and boot
 
-### Python 3.9+
+### Python 3.11+
 
-Raspberry Pi OS Bookworm ships with **Python 3.11** ✅
+Raspberry Pi OS Bookworm ships with **Python 3.11** ✅ — exactly the minimum this project requires.
 
 **Verify installation:**
 ```bash
@@ -198,7 +198,7 @@ Before starting setup, verify:
 - [ ] Raspberry Pi Zero 2 W powered on, SSH-accessible
 - [ ] Camera Module 3 NOIR physical installed, recognized
 - [ ] CyberBrick powered on, within Bluetooth range
-- [ ] Python 3.9+ available
+- [ ] Python 3.11+ available
 - [ ] Internet connection for dependency installation
 - [ ] microSD card has ~5GB free space (for photos)
 

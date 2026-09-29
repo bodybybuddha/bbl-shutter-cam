@@ -201,16 +201,13 @@ python -m pytest tests/ -v          # Run tests
 
 **License:** MIT (see [LICENSE](LICENSE))
 
-**Status:** Stable - v1.0.0 release
+**Status:** Stable - v1.0.3 release
 
 **Roadmap:** See [ROADMAP.md](ROADMAP.md) for planned features:
 - Hardware detection & interactive setup wizard (Stage TBD)
-- **Web streaming & Home Assistant integration** - Live preview and remote monitoring (Stage 4, planned post-v1)
-  - Optional `/snapshot` and `/stream` HTTP endpoints
-  - Lightweight on Pi Zero 2W (MJPEG @ 640×480, 10-15 fps)
-  - Home Assistant camera entity integration
-  - Smartphone-friendly web UI
+- **Web streaming** - optional `/snapshot`, `/capture`, and `/stream` (live MJPEG) HTTP endpoints alongside the BLE listener (Stage 4 Phase 1+2, shipped in v1.0.3)
   - See [Web Streaming Documentation](https://bodybybuddha.github.io/bbl-shutter-cam/advanced/web-streaming.html) for details
+- **Home Assistant integration** - camera entity docs + optional MQTT support (Stage 4 Phase 3, planned)
 - Multi-machine CLI and config management (future)
 
 ---
@@ -227,8 +224,8 @@ python -m pytest tests/ -v          # Run tests
 | Component | Minimum | Recommended |
 |-----------|---------|-------------|
 | **Raspberry Pi** | Pi 3B+ | Pi Zero 2 W or Pi 5 |
-| **OS** | Bullseye | Bookworm (Lite) |
-| **Python** | 3.9 | 3.11+ |
+| **OS** | Bookworm (Lite) | Bookworm (Lite) |
+| **Python** | 3.11 | 3.11+ |
 | **Camera** | libcamera compatible | Pi Camera Module 3 |
 | **Bluetooth** | Built-in/USB adapter | Built-in module |
 
