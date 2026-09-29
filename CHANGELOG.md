@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-09-29
+
+### Changed
+- Maintenance release: routine dependency updates, all hardware-validated (not just CI-green) before merging
+  - `bleak` 0.22.0 → allow up to 3.1 (validated live against real CyberBrick hardware on Pi 5 after root-causing an initial connection hang to a stale BlueZ bond, not the library itself)
+  - `tomlkit` 0.12.0 → allow up to 0.16 (required removing 3 now-unused `type: ignore` comments in `config.py`, since the new version's improved type stubs made mypy flag them)
+  - `black` 23.0 → allow up to 27 (required a one-line formatting fix in `scripts/pyinstaller_entry.py`; black 26 changed its blank-line rule around `if __name__ == "__main__":` guards)
+  - `pytest` 7.0 → allow up to 10, `mypy` 1.0 → allow up to 3
+  - CI: `actions/checkout` 6→7, `actions/setup-python` 6→7, `softprops/action-gh-release` 2→3
+
 ## [1.0.3] - 2026-09-29
 
 ### Added

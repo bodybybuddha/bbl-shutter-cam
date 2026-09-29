@@ -201,7 +201,7 @@ python -m pytest tests/ -v          # Run tests
 
 **License:** MIT (see [LICENSE](LICENSE))
 
-**Status:** Stable - v1.0.3 release
+**Status:** Stable - v1.0.4 release
 
 **Roadmap:** See [ROADMAP.md](ROADMAP.md) for planned features:
 - Hardware detection & interactive setup wizard (Stage TBD)
