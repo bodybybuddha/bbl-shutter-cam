@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-09-29
+
 ### Added
 - Optional web server (Stage 4, Phase 1): `--web-port` flag on `run` starts a FastAPI/uvicorn server alongside the BLE listener in the same asyncio event loop
   - `GET /snapshot`: on-demand preview JPEG, overwrites a single file rather than growing the time-lapse archive
@@ -22,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Breaking:** minimum supported Python bumped from 3.9 to **3.11**. Matches what Raspberry Pi OS Bookworm (the documented recommended install target) ships by default, and fixes a class of mypy CI failures where third-party dependencies pulled in by the new `[web]` extra use `match` statements (3.10+ syntax) that failed to parse under the old, older `python_version` target. Older installs on Bullseye-era Python 3.9/3.10 need to upgrade Python (or stay on v1.0.2) before updating.
+
+### Fixed
+- Dependabot now opens dependency-update PRs against `dev` instead of `main` (`target-branch` was previously unset, so PRs defaulted to `main` and were always rejected by this repo's own branch policy)
 
 ## [1.0.2] - 2026-02-15
 
