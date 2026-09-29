@@ -11,6 +11,5 @@ from __future__ import annotations
 
 from bbl_shutter_cam.cli import main
 
-
 if __name__ == "__main__":
     raise SystemExit(main())
