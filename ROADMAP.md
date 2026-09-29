@@ -477,6 +477,7 @@ While bbl-shutter-cam was initially designed as an event-driven tool without per
 
 | Version | Date | Stages Completed | Status |
 |---------|------|------------------|--------|
+| v1.0.4 | 2026-09-29 | Maintenance (dependency updates, hardware-validated) | ✅ Released |
 | v1.0.3 | 2026-09-29 | Stage 4 Phase 1 + 2 (web snapshot/capture/streaming), Python 3.11 floor | ✅ Released |
 | v1.0.2 | 2026-02-15 | Documentation improvements and link fixes | ✅ Released |
 | v1.0.1 | 2026-02-15 | Bug Fix (PyInstaller relative-import failure) | ✅ Released |
