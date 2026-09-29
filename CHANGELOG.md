@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `run_profile()` now handles SIGTERM (what `systemctl stop`, `timeout`, and a plain `kill` send) the same as Ctrl+C/SIGINT — previously only `KeyboardInterrupt` was caught, so a SIGTERM skipped `client.disconnect()` entirely and could leave BlueZ believing it was still connected, breaking the next connection attempt
+
 ## [1.0.4] - 2026-09-29
 
 ### Changed
