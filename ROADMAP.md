@@ -286,7 +286,7 @@ capture = false
 
 ---
 
-## Stage 4: Web Streaming & Home Assistant Integration 📋 Planned (Post-v1)
+## Stage 4: Web Streaming & Home Assistant Integration 🟡 Phase 1 + 2 Complete (v1.0.3), Phase 3 Planned
 
 ### Objectives
 - Add optional web-based live streaming capability for remote monitoring
@@ -379,13 +379,16 @@ capture = false
 ### Configuration Examples
 
 **Enable streaming with defaults:**
+```bash
+bbl-shutter-cam run --profile my-printer --web-port 8080 --enable-stream
+```
 ```toml
 [profiles.my-printer]
 # ... existing config ...
 
-# Optional: customize stream settings
+# Optional: customize stream settings (web_port/enable-stream stay CLI flags,
+# not config keys — whether the web server/stream runs is a per-invocation choice)
 [profiles.my-printer.server]
-web_port = 8080
 stream_resolution = "640x480"
 stream_fps = 12
 stream_timeout_seconds = 300
@@ -409,9 +412,9 @@ camera:
 - Camera: libcamera/picamera2 with streaming support
 
 ### Phase Planning
-- **Phase 1** (immediate): `/snapshot` endpoint, basic web UI
-- **Phase 2** (following): On-demand MJPEG streaming with timeout
-- **Phase 3**: Full Home Assistant integration docs + MQTT support
+- **Phase 1** ✅ Complete (v1.0.3): `/snapshot` + `/capture` endpoints, basic web UI
+- **Phase 2** ✅ Complete (v1.0.3): On-demand MJPEG streaming (`/stream`) with timeout, `capture_mode` for stream/capture cooperation
+- **Phase 3** 📋 Planned: Full Home Assistant integration docs + MQTT support
 
 ### Testing Strategy
 - Unit tests for stream handlers and timeout logic
@@ -474,6 +477,9 @@ While bbl-shutter-cam was initially designed as an event-driven tool without per
 
 | Version | Date | Stages Completed | Status |
 |---------|------|------------------|--------|
+| v1.0.3 | 2026-09-29 | Stage 4 Phase 1 + 2 (web snapshot/capture/streaming), Python 3.11 floor | ✅ Released |
+| v1.0.2 | 2026-02-15 | Documentation improvements and link fixes | ✅ Released |
+| v1.0.1 | 2026-02-15 | Bug Fix (PyInstaller relative-import failure) | ✅ Released |
 | v1.0.0 | 2026-02-14 | Stage 3, Stage 5 | ✅ Released |
 | v0.3.1 | 2026-02-14 | Bug Fix (output_dir default) | ✅ Released |
 | v0.3.0 | 2026-02-14 | Stage 2.6 (Camera Calibration) | ✅ Released |
@@ -484,11 +490,11 @@ While bbl-shutter-cam was initially designed as an event-driven tool without per
 
 | Version | Target | Planned Stages | Complexity |
 |---------|--------|----------------|------------|
-| TBD | TBD | Post-v1 features (Hardware Detection, Extended Features) | Medium |
+| TBD | TBD | Stage 4 Phase 3 (Home Assistant docs, MQTT), Hardware Detection, Extended Features | Medium |
 
 ### Post-v1.0.0 Development
 
-Future enhancements (Hardware Detection, Extended Features) will be planned after v1.0.0 based on user feedback and requirements.
+Future enhancements (Stage 4 Phase 3, Hardware Detection, Extended Features) will be planned based on user feedback and requirements.
 
 ---
 

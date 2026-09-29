@@ -99,6 +99,19 @@ nopreview = true
 # timeout = 5000       # capture timeout in milliseconds
 ```
 
+# ----------------------------
+# Web server (optional, Stage 4)
+# ----------------------------
+# Only used when `run` is started with --web-port; enables /snapshot
+# and /capture. --enable-stream additionally requires --web-port and
+# turns on /stream (live MJPEG via rpicam-vid).
+# [profiles.p1s-office.server]
+# stream_resolution = "640x480"  # WxH; lower this to mimic weaker hardware (e.g. Pi Zero 2W)
+# stream_fps = 12
+# jpeg_quality = 80
+# stream_timeout_seconds = 300.0
+# capture_mode = "frame"  # "frame" (instant, stream-resolution) or "pause" (full-res, brief stream glitch)
+
 # --------------------------------------------------
 
 # Additional profiles can be added below
